@@ -16,7 +16,7 @@ use Carp qw(croak carp cluck);
 
 use vars qw($VERSION);
 
-our $VERSION		= '0.28';
+our $VERSION		= '0.29';
 
 our @ATTRIBUTES		= qw(dn cluster cookie);
 
@@ -173,6 +173,7 @@ sub new {
         defined $args{cluster}  ? $self->{cluster}  = $args{cluster}	: croak 'cluster not defined';
         defined $args{username} ? $self->{username} = $args{username}	: croak 'username not defined';
         defined $args{passwd}	? $self->{passwd}   = $args{passwd}	: croak 'passwd not defined';
+        defined $args{verify_hostname} ? $self->{verify_hostname} = $args{verify_hostname} : 0;
 	$self->{port}		= ($args{port}	or 443);
 	$self->{proto}		= ($args{proto} or 'https');
 	$self->{dn}		= ($args{dn} or 'sys');
@@ -201,7 +202,7 @@ sub login {
 	my $self = shift;
 
 	undef $self->{error};
-	$self->{ua}	= LWP::UserAgent->new;
+	$self->{ua}	= LWP::UserAgent->new( ssl_opts => { verify_hostname => $self->{verify_hostname} } );
 	$self->{uri}	= $self->{proto}. '://' .$self->{cluster}. ':' .$self->{port}. '/nuova';
 	$self->{req}	= HTTP::Request->new(POST => $self->{uri});
 	$self->{req}->content_type('application/x-www-form-urlencoded');
@@ -659,6 +660,21 @@ sub get_cluster_status {
 
 	return (defined $xml->{outConfig}->{topSystem} ? $xml->{outConfig}->{topSystem} : undef)
 }
+
+=head3 version ()
+
+	my $version = $ucs->version;
+
+This method returns a string containign the running UCSM software version.
+
+=cut
+
+sub version {
+	my $self= shift;
+	my $xml	= $self->resolve_dn(dn => 'sys/mgmt/fw-system') or return;
+	return (defined $xml->{outConfig}->{firmwareRunning}->{version} ? $xml->{outConfig}->{firmwareRunning}->{version} : undef)
+}
+
 
 =head3 mgmt_entity ( $id )
 
