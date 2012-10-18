@@ -1,0 +1,59 @@
+Cisco-UCS - A Perl interface to the Cisco UCS XML API
+=====================================================
+
+This package provides an abstracted interface to the Cisco UCS Manager 
+XML API and Cisco UCS Management Information Model.
+
+The Cisco UCS Manager (UCSM) is an embedded software agent providing 
+access to the hardware and configuration management features of attached 
+Cisco UCS hardware.  The Management Information Model for the UCSM is 
+organised into a structured heirachy of both physical and virtual objects.  
+Accessing objects within the heirachy is done through a number of high 
+level calls to heirachy search and traversal methods.
+
+The primary aim of this package is to provide a simplified and abstract 
+interface to this management heirachy.
+
+INSTALLATION
+------------
+To install this module, run the following commands:
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+SUPPORT AND DOCUMENTATION
+-------------------------
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Cisco::UCS
+
+You can also look for information at:
+
+    RT, CPAN's request tracker
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS
+
+    AnnoCPAN, Annotated CPAN documentation
+        http://annocpan.org/dist/Cisco-UCS
+
+    CPAN Ratings
+        http://cpanratings.perl.org/d/Cisco-UCS
+
+    Search CPAN
+        http://search.cpan.org/dist/Cisco-UCS/
+
+
+LICENSE AND COPYRIGHT
+---------------------
+
+Copyright (C) 2011 Luke Poskitt
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
