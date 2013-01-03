@@ -1,5 +1,5 @@
 Revision history for Cisco-UCS
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
-
+0.30	Fri 4 2012 <ltp@cpan.org>
+	-Fixed bug in _get_child_objects in UCS.pm that prevented correct handling
+	of single child entities.

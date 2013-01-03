@@ -15,6 +15,68 @@ our %ATTRIBUTES	= (
 		performance	=> 'perf'
 		);
 
+#our 
+#	'outputCurrentMin' => '10.000000',
+#	'input210vAvg' => '239.000000',
+#	'outputPowerAvg' => '120.869995',
+#	'outputCurrent' => '10.000000',
+#	'ambientTemp' => '26.000000',
+#	'psuTemp1' => '0.000000',
+#	'output12vAvg' => '12.087000',
+#	'output12vMin' => '12.087000',
+#	'outputCurrentMax' => '10.000000',
+#	'output12v' => '12.087000',
+#	'timeCollected' => '2012-10-19T13:07:33.952',
+#	'outputCurrentAvg' => '10.000000',
+#	'psuTemp2' => '0.000000',
+#	'suspect' => 'no',
+#	'thresholded' => '',
+#	'ambientTempMin' => '26.000000',
+#	'ambientTempMax' => '26.000000',
+#	'output3v3Max' => '3.048000',
+#	'output12vMax' => '12.087000',
+#	'outputPowerMin' => '120.869995',
+#	'input210v' => '239.000000',
+#	'outputPowerMax' => '120.869995',
+#	'input210vMin' => '239.000000',
+#	'ambientTempAvg' => '26.000000',
+#	'outputPower' => '120.869995',
+#	'output3v3Avg' => '3.048000',
+#	'intervals' => '58982460',
+#	'output3v3' => '3.048000',
+#	'update' => '131073',
+#	'dn' => 'sys/chassis-1/psu-1/stats',
+#	'input210vMax' => '239.000000',
+#	'output3v3Min' => '3.048000'
+
+
+
+sub new {
+        my ($class, %args) = @_;
+        my $self = {};
+        bless $self, $class;
+        defined $args{dn}       ? $self->{dn}   = $args{dn}             : croak 'dn not defined';
+        defined $args{ucs}      ? weaken($self->{ucs} = $args{ucs})     : croak 'ucs not defined';
+        my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentPsu}};
+        
+        while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+                
+        return $self;
+}
+
+{
+        no strict 'refs';
+
+        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
+                *{ __PACKAGE__ . '::' . $pseudo } = sub { return $_[0]->{$attribute} }
+        }
+
+        foreach my $attribute (@ATTRIBUTES) {
+                *{ __PACKAGE__ . '::' . $attribute } = sub { return $_[0]->{$attribute} }
+        }
+}
+
+
 =head1 NAME
 
 Cisco::UCS::Common::PSU - Class for operations with a Cisco UCS PSU.
@@ -91,22 +153,6 @@ Returns the operational status of the PSU.
 
 Returns the performance status of the PSU.
 
-=cut
-
-sub new {
-        my ($class, %args) = @_;
-        my $self = {};
-        bless $self, $class;
-        defined $args{dn}       ? $self->{dn}   = $args{dn}             : croak 'dn not defined';
-        defined $args{ucs}      ? weaken($self->{ucs} = $args{ucs})     : croak 'ucs not defined';
-        my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentPsu}};
-        
-        while (my ($k, $v) = each %attr) { $self->{$k} = $v }
-                
-        return $self;
-}
-
-
 =head1 AUTHOR
 
 Luke Poskitt, C<< <ltp at cpan.org> >>
@@ -167,24 +213,5 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
-
-{
-        no strict 'refs';
-
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
-                *{ __PACKAGE__ . '::' . $pseudo } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }
-        }
-
-        foreach my $attribute (@ATTRIBUTES) {
-                *{ __PACKAGE__ . '::' . $attribute } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }
-        }
-
-}
 
 1;

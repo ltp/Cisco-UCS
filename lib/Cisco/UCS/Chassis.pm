@@ -425,4 +425,4 @@ See http://dev.perl.org/licenses/ for more information.
         } 
 }
 
-1; # End of Cisco::UCS::Chassis
+1;

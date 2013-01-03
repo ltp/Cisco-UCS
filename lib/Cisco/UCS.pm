@@ -16,7 +16,7 @@ use Carp qw(croak carp cluck);
 
 use vars qw($VERSION);
 
-our $VERSION		= '0.29';
+our $VERSION		= '0.30';
 
 our @ATTRIBUTES		= qw(dn cluster cookie);
 
@@ -357,7 +357,8 @@ sub _get_child_objects {
 	} 
 	elsif ((ref($xml->{outConfigs}->{$args{type}}) eq 'HASH') and (exists $xml->{outConfigs}->{$args{type}}->{dn})) {
 		$args{uid} ||= 'id';
-		my $res->{$xml->{outConfigs}->{$args{type}}->{$args{uid}}} = $xml->{outConfigs}->{$args{type}};
+		my $res;
+		$res->{$xml->{outConfigs}->{$args{type}}->{$args{uid}}} = $xml->{outConfigs}->{$args{type}};
 		$xml->{outConfigs}->{$args{type}} = $res
 	}
 
