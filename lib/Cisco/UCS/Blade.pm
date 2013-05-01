@@ -92,6 +92,30 @@ sub new {
         }   
 }
 
+sub led {
+	my ( $self, $state ) = @_;
+	$state = lc $state;
+	$state eq 'on' || $state eq 'off' or return;
+	my $req = <<XML;
+	<configConfMos cookie="$self->{ucs}->{cookie}" inHierarchical="false">
+		<inConfigs>
+        		<pair key="sys/chassis-$self->{chassisId}/blade-$self->{slotId}/locator-led">
+				<equipmentLocatorLed adminState="$state" dn="sys/chassis-$self->{chassisId}/blade-$self->{slotId}/locator-led" id="1" name="" ></equipmentLocatorLed>
+			</pair>
+		</inConfigs>
+	</configConfMos>
+XML
+	my $xml = $self->{ucs}->_ucsm_request( $req );
+	
+	if ( defined $xml->{'errorCode'} ) {
+		my $self->{error} = (defined $xml->{'errorDescr'} ? $xml->{'errorDescr'} : "Unspecified error");
+		print "got error: $self->{error}\n";
+		return
+	}
+	
+	return 1
+}
+
 =head1 METHODS
 
 =head3 admin_state
@@ -145,6 +169,10 @@ Returns the dn (distinguished name) of the specified blade in the UCS management
 =head3 id
 
 Returns the id of the specified blade in the chassis  - this is equivalent to the slot ID number (e.g. 1 .. 8).
+
+=head3 led ( $state )
+
+Sets the locator led of the blade to the desired state; either on or off;
 
 =head3 managing_instance
 

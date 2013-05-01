@@ -1,5 +1,8 @@
 Revision history for Cisco-UCS
 
+0.31	Wed May 1 2013 <ltp@cpan.org>
+	- Added let method to Cisco::UCS::Blade
+
 0.30	Fri 4 2012 <ltp@cpan.org>
 	-Fixed bug in _get_child_objects in UCS.pm that prevented correct handling
 	of single child entities.
