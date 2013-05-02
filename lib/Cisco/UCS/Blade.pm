@@ -5,6 +5,7 @@ use strict;
 
 use Carp 		qw(croak);
 use Scalar::Util 	qw(weaken);
+use Cisco::UCS::Common::PowerStats;
 
 our $VERSION = '0.1';
 
@@ -115,6 +116,15 @@ XML
 	
 	return 1
 }
+
+sub get_power_stats {
+	my $self = shift;
+	return Cisco::UCS::Common::PowerStats->new( 
+		$self->{ucs}->resolve_dn( dn => "$self->{dn}/board/power-stats" )->{outConfig}->{computeMbPowerStats} )
+}
+
+1;
+__END__
 
 =head1 METHODS
 
@@ -331,5 +341,3 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
-
-1;
