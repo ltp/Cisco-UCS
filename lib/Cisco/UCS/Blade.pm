@@ -7,7 +7,7 @@ use Carp 		qw(croak);
 use Scalar::Util 	qw(weaken);
 use Cisco::UCS::Common::PowerStats;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 our @ATTRIBUTES	= qw(association availability discovery dn model name operability presence revision serial uuid vendor);
 
@@ -38,29 +38,6 @@ our %ATTRIBUTES = (
 		user_label		=> 'usrLbl',
 		uuid_original		=> 'originalUuid'
 		);
-
-=head1 NAME
-
-Cisco::UCS::Blade - Class for operations with a Cisco UCS blade.
-
-=cut
-
-=head1 SYNOPSIS
-
-    foreach my $blade ($ucs->chassis(1)->get_blades) {
-      printf ("%1d\t: %-20s\n", $blade->id, $blade->serial)
-    }
-
-    print $chassis(2)->blade(3)->memory_available;
-
-=head1 DECRIPTION
-
-Cisco::UCS::Blade is a class providing operations with a Cisco UCS Blade.
-
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Blade object
-is created automatically by method calls to a L<Cisco::UCS::Chassis> object.
-
-=cut
 
 sub new {
 	my ($class, %args) = @_;
@@ -117,7 +94,7 @@ XML
 	return 1
 }
 
-sub get_power_stats {
+sub power_stats {
 	my $self = shift;
 	return Cisco::UCS::Common::PowerStats->new( 
 		$self->{ucs}->resolve_dn( dn => "$self->{dn}/board/power-stats" )->{outConfig}->{computeMbPowerStats} )
@@ -125,6 +102,66 @@ sub get_power_stats {
 
 1;
 __END__
+
+=head1 NAME
+
+Cisco::UCS::Blade - Class for operations with a Cisco UCS blade.
+
+=cut
+
+=head1 SYNOPSIS
+
+        # Print all blades in chassis 1 along with their serial number
+
+        foreach my $blade ($ucs->chassis(1)->get_blades) {
+                printf ("%1d\t: %-20s\n", $blade->id, $blade->serial)
+        }
+
+        # Print the memory installed and available in blade 2/3
+
+        print $chassis(2)->blade(3)->memory_available;
+
+        # Print all blades in all chassis along with a cacti-style listing of the
+        # blades current, minimum and maximum power consumption values.
+
+        map { 
+                print "Chassis: " . $_->id ."\n";
+                map { print "\tBlade: ". $_->id ." - Power consumed -"
+                          . " Current:". $_->power_stats->consumed_power 
+                          . " Max:". $_->power_stats->consumed_power_max 
+                          . " Min:". $_->power_stats->consumed_power_min ."\n" 
+                } 
+                sort { $a->id <=> $b->id } $_->get_blades 
+        } 
+        sort { 
+                $a->id <=> $b->id 
+        } $ucs->get_chassiss;
+
+        # Prints something like:
+        #
+        # Chassis: 1
+        #       Blade: 1 - Power consumed - Current:115.656647 Max:120.913757 Min:110.399513
+        #       Blade: 2 - Power consumed - Current:131.427994 Max:139.313675 Min:126.170883
+        #       Blade: 3 - Power consumed - Current:131.427994 Max:157.713593 Min:126.170883
+        #       Blade: 4 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
+        #       Blade: 5 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
+        #       Blade: 6 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
+        #       Blade: 7 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
+        #       Blade: 8 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
+        # Chassis: 2
+        #       Blade: 1 - Power consumed - Current:131.427994 Max:136.685120 Min:128.799438
+        #       Blade: 2 - Power consumed - Current:126.170883 Max:131.427994 Min:123.542320
+        #       Blade: 3 - Power consumed - Current:134.056564 Max:155.085037 Min:131.427994
+        # ...etc.
+
+=head1 DECRIPTION
+
+Cisco::UCS::Blade is a class providing operations with a Cisco UCS Blade.
+
+Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Blade object
+is created automatically by method calls to a L<Cisco::UCS::Chassis> object.
+
+=cut
 
 =head1 METHODS
 
@@ -247,6 +284,11 @@ Returns the operational status of the specified blade.
 =head3 presence
 
 Returns the presence status of the specified blade.
+
+=head3 power_stats
+
+Returns a L<Cisco::UCS::Common::PowerStats> object representing the power usage
+statistics of the specified blade.
 
 =head3 revision
 
