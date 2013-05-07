@@ -15,6 +15,7 @@ lib/Cisco/UCS/Common/Fan.pm
 lib/Cisco/UCS/Common/PSU.pm
 lib/Cisco/UCS/Common/SwitchCard.pm
 lib/Cisco/UCS/Common/EthernetPort.pm
+lib/Cisco/UCS/Common/PowerStats.pm
 t/00-load.t
 t/manifest.t
 t/pod-coverage.t

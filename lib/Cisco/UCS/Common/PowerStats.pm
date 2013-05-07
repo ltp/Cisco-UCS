@@ -15,7 +15,7 @@ our %V_MAP = (
 	inputCurrent	=> 'input_current',
 	inputCurrentAvg	=> 'input_current_avg',
 	inputCurrentMin => 'input_current_min',
-	inputCurrentMax => 'input_cureent_max',
+	inputCurrentMax => 'input_current_max',
 	inputVoltage	=> 'input_voltage',
 	inputVoltageAvg	=> 'input_voltage_avg',
 	inputVoltageMin	=> 'input_voltage_min',
@@ -103,165 +103,65 @@ is created automatically by method calls on a L<Cisco::UCS::Blade> object.
 
 =head1 METHODS
 
-=head3 admin_state
+=head3 consumed_power
 
-Returns the administrative state of the specified Common::PowerStats.
+Returns the current power consumed value for the blade.
 
-=head3 assignment
+=head3 consumed_power_avg
 
-Returns the dn of the service profile currently assigned to the specified Common::PowerStats.
+Returns the current average power consumed value for the blade.
 
-=head3 association
+=head3 consumed_power_min
 
-Returns the association status of the specified Common::PowerStats.
+Returns the current minimum power consumed value for the blade.
 
-=head3 availability 
+=head3 consumed_power_max
 
-Returns the availability status of the specified Common::PowerStats.
+Returns the current maximum power consumed value for the blade.
 
-=head3 conn_path
+=head3 input_current
 
-Returns the connectivity path detail of the specified Common::PowerStats.
+Returns the current input current value for the blade.
 
-=head3 conn_status
+=head3 input_current_avg
 
-Returns the connectivity path status of the specified Common::PowerStats.
+Returns the current average input current value for the blade.
 
-=head3 cores_enabled
+=head3 input_current_min
 
-Returns the number of enabled cores for the specified Common::PowerStats.
+Returns the current minimum input current value for the blade.
 
-=head3 chassis
+=head3 input_current_max
 
-Returns the chassis ID of the chassis in which the specified Common::PowerStats is located.
+Returns the current maximum input current value for the blade.
 
-=head3 checkpoint
+=head3 input_voltage
 
-returns the checkpoint status of the specified Common::PowerStats.
+Returns the current input voltage value for the blade.
 
-=head3 description
+=head3 input_voltage_avg
 
-Returns the value of the user description field for the specified Common::PowerStats.
+Returns the current average input voltage value for the blade.
 
-=head3 discovery
+=head3 input_voltage_min
 
-Returns the discovery status of the specified Common::PowerStats.
+Returns the current minimum input voltage value for the blade.
 
-=head3 dn
+=head3 input_voltage_max
 
-Returns the dn (distinguished name) of the specified Common::PowerStats in the UCS management heirarchy.
+Returns the current maximum input voltage value for the blade.
 
-=head3 id
+=head3 thresholded
 
-Returns the id of the specified Common::PowerStats in the chassis  - this is equivalent to the slot ID number (e.g. 1 .. 8).
+Returns the input power thresholded state for the blade.
 
-=head3 led ( $state )
+=head3 suspect
 
-Sets the locator led of the Common::PowerStats to the desired state; either on or off;
+Returns the input power suspect state for the blade.
 
-=head3 managing_instance
+=head3 time_collected
 
-Returns the managing instance for the specified Common::PowerStats (either A or B).
-
-=head3 memory_available
-
-Returns the amount of available memory (in Mb) for the specified Common::PowerStats.
-
-=head3 memory_speed
-
-Returns the operational memory speed (in MHz) of the specified Common::PowerStats.
-
-=head3 memory_total
-
-Returns the total amount of memory installed (in Mb) in the specified Common::PowerStats.
-
-=head3 model
-
-Returns the model number of the specified Common::PowerStats.
-
-=head3 name
-
-Returns the name of the specified Common::PowerStats.
-
-=head3 num_adaptors
-
-Returns the number of adaptors in the specified Common::PowerStats.
-
-=head3 num_cores
-
-Returns the number of CPU cores in the specified Common::PowerStats.
-
-=head3 num_cpus
-
-Returns the number of CPUs in teh specified Common::PowerStats.
-
-=head3 num_eth_ifs
-
-Returns the number of Ethernet interfaces configured on teh specified Common::PowerStats.
-
-=head3 num_fc_ifs
-
-Returns the number of Fibre Channel interfaces configured on teh specified Common::PowerStats.
-
-=head3 num_threads
-
-Returns the number of execution threads available on the specified Common::PowerStats.
-
-=head3 operability
-
-Returns the operability status of the specified Common::PowerStats.
-
-=head3 oper_power
-
-Returns the operational power state of the specified Common::PowerStats.
-
-=head3 oper_state
-
-Returns the operational status of the specified Common::PowerStats.
-
-=head3 presence
-
-Returns the presence status of the specified Common::PowerStats.
-
-=head3 power_stats
-
-Returns a L<Cisco::UCS::Common::PowerStats> object representing the power usage
-statistics of the specified Common::PowerStats.
-
-=head3 revision
-
-Returns the revision level of the specified Common::PowerStats.
-
-=head3 serial
-
-Returns the serial number of the specified Common::PowerStats.
-
-=head3 server_id
-
-Returns the ID of the specified Common::PowerStats in chassis/slot notation (e.g. this value would be 2/8
-for a server in the eight slot of the second chassis).
-
-=head3 slot_id
-
-Returns the slot ID of the specified Common::PowerStats - this is the same value as returned by the I<id> method.
-
-=head3 user_label
-
-Returns the value for the user-specified label of the designated Common::PowerStats.
-
-=head3 uuid
-
-Returns the UUID of the specified Common::PowerStats - note that this UUID value is the user-specified value and may differ
-to the original UUID value of the Common::PowerStats (see I<uuid_original>).
-
-=head3 uuid_original
-
-Returns the original UUID value of the specified Common::PowerStats - this value is the "burned-in" UUID for the Common::PowerStats.
-
-=head3 vendor
-
-Returns the vendor identifier of the specified Common::PowerStats.
-
+Returns the timestamp at which time the power statsitics were collected.
 
 =head1 AUTHOR
 
@@ -270,10 +170,8 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-cisco-ucs-Common::PowerStats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common::PowerStats>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common::PowerStats>.  I will 
+be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
 
 =head1 SUPPORT
@@ -311,7 +209,7 @@ L<http://search.cpan.org/dist/Cisco-UCS-Common::PowerStats/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2012 Luke Poskitt.
+Copyright 2013 Luke Poskitt.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
