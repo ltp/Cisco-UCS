@@ -5,6 +5,7 @@ use strict;
 
 use Carp 		qw(croak);
 use Scalar::Util 	qw(weaken);
+use Cisco::UCS::Blade::CPU;
 use Cisco::UCS::Common::PowerStats;
 
 our $VERSION = '0.2';
@@ -98,6 +99,32 @@ sub power_stats {
 	my $self = shift;
 	return Cisco::UCS::Common::PowerStats->new( 
 		$self->{ucs}->resolve_dn( dn => "$self->{dn}/board/power-stats" )->{outConfig}->{computeMbPowerStats} )
+}
+
+sub cpu {
+	my ( $self, $id ) = @_;
+	return ( defined $self->{cpu}->{$id} ? $self->{cpu}->{$id} : $self->get_cpus( $id ) )
+}
+
+sub get_cpu {
+	my ( $self, $id ) = @_;
+	return ( $id ? $self->get_cpus( $id ) : undef )
+}
+
+sub get_cpus {
+	my ( $self, $id ) = @_;	
+	my $cpus = $self->{ucs}->resolve_children( dn => "$self->{dn}/board" )->{outConfigs}->{processorUnit};
+	my @cpus;
+
+	while ( my ( $id, $cpu ) = each %$cpus ) {
+		$cpu->{id} = $id;
+		$cpu = Cisco::UCS::Blade::CPU->new( $self->{ucs}, $cpu );
+		push @cpus, $cpu;
+		$self->{cpu}->{$id} = $cpu;
+		return $cpu if ( $cpu->id == $id )
+	}
+
+	return @cpus;
 }
 
 1;
