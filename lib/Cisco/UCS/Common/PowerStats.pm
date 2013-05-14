@@ -53,7 +53,7 @@ __END__
 
 =head1 NAME
 
-Cisco::UCS::Common::PowerStats - Class for operations with a Cisco UCS Common::PowerStats power usage statistics.
+Cisco::UCS::Common::PowerStats - Class for operations with Cisco UCS power usage statistics.
 
 =cut
 
@@ -64,7 +64,7 @@ Cisco::UCS::Common::PowerStats - Class for operations with a Cisco UCS Common::P
 
 	map { 
 		print "Chassis: " . $_->id ."\n";
-		map { print "\tCommon::PowerStats: ". $_->id ." - Power consumed -"
+		map { print "\tBlade: ". $_->id ." - Power consumed -"
 			  . " Current:". $_->power_stats->consumed_power 
 			  . " Max:". $_->power_stats->consumed_power_max 
 			  . " Min:". $_->power_stats->consumed_power_min ."\n" 
@@ -94,7 +94,7 @@ Cisco::UCS::Common::PowerStats - Class for operations with a Cisco UCS Common::P
 
 =head1 DECRIPTION
 
-Cisco::UCS::Common::PowerStats is a class providing operations with a Cisco UCS Common::PowerStats.
+Cisco::UCS::Common::PowerStats is a class providing operations with a Cisco UCS power usage statistics.
 
 Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::PowerStats object
 is created automatically by method calls on a L<Cisco::UCS::Blade> object.
@@ -169,8 +169,8 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-Common::PowerStats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common::PowerStats>.  I will 
+Please report any bugs or feature requests to C<bug-cisco-ucs-common-powerstats at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PowerStats>.  I will 
 be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
 
@@ -187,19 +187,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Common::PowerStats>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Common-PowerStats>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Cisco-UCS-Common::PowerStats>
+L<http://annocpan.org/dist/Cisco-UCS-Common-PowerStats>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Cisco-UCS-Common::PowerStats>
+L<http://cpanratings.perl.org/d/Cisco-UCS-Common-PowerStats>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Cisco-UCS-Common::PowerStats/>
+L<http://search.cpan.org/dist/Cisco-UCS-Common-PowerStats/>
 
 =back
 
