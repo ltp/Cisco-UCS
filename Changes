@@ -1,5 +1,11 @@
 Revision history for Cisco-UCS
 
+0.32	Wed May 15 2013 <ltp@cpan.org>
+	- Added Cisco::UCS::Blade::CPU
+	- Added Cisco::UCS::Common::PowerStats
+	- Added Cisco::UCS::Common::EnvironmentalStats
+	- Updated Cisco::UCS::Blade - new methods for retrieving CPU and power stats.
+
 0.31	Wed May 1 2013 <ltp@cpan.org>
 	- Added let method to Cisco::UCS::Blade
 
