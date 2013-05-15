@@ -28,41 +28,41 @@ Cisco::UCS - A Perl interface to the Cisco UCS XML API
 
 =head1 SYNOPSIS
 
-use Cisco::UCS;
+	use Cisco::UCS;
 
-my $ucs = Cisco::UCS->new (
-			cluster		=> $cluster, 
-			username	=> $username,
-			passwd		=> $password
-			);
+	my $ucs = Cisco::UCS->new (
+				cluster		=> $cluster, 
+				username	=> $username,
+				passwd		=> $password
+				);
 
-$ucs->login();
+	$ucs->login();
 
-@errors = $ucs->get_errors(severity=>"critical",ack="no");
+	@errors = $ucs->get_errors(severity=>"critical",ack="no");
 
-foreach my $error_id (@errors) {
-	my %this_error = $ucs->get_error_id($error_id);
-	print "Error ID: $error_id.  Severity: $this_error{severity}.  Description: $this_error{descr}\n";
-}
+	foreach my $error_id (@errors) {
+		my %this_error = $ucs->get_error_id($error_id);
+		print "Error ID: $error_id.  Severity: $this_error{severity}.  Description: $this_error{descr}\n";
+	}
 
-print "Interconnect A serial : " . $ucs->interconnect(A)->serial . "\n";
+	print "Interconnect A serial : " . $ucs->interconnect(A)->serial . "\n";
 
-# prints "Interconnect A serial : BFG9000"
+	# prints "Interconnect A serial : BFG9000"
 
-foreach my $chassis ($ucs->chassis) {
-	print "Chassis " . $chassis->id . " serial : " . $chassis->serial . "\n"
-}
+	foreach my $chassis ($ucs->chassis) {
+		print "Chassis " . $chassis->id . " serial : " . $chassis->serial . "\n"
+	}
 
-# prints:
-# "Chassis 1 serial : ABC1234"
-# "Chassis 2 serial : ABC1235"
-# etc.
+	# prints:
+	# "Chassis 1 serial : ABC1234"
+	# "Chassis 2 serial : ABC1235"
+	# etc.
 
-print "Interconnect A Ethernet 1/1 TX bytes: " . $ucs->interconnect(A)->card(1)->eth_port(1)->tx_total_bytes . "\n";
+	print "Interconnect A Ethernet 1/1 TX bytes: " . $ucs->interconnect(A)->card(1)->eth_port(1)->tx_total_bytes . "\n";
 
-# prints "Interconnect A Ethernet 1/1 TX bytes: 83462486"
+	# prints "Interconnect A Ethernet 1/1 TX bytes: 83462486"
 
-$ucs->logout();
+	$ucs->logout();
 
 =head1 DESCRIPTION
 
