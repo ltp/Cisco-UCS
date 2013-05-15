@@ -8,7 +8,7 @@ use Scalar::Util 	qw(weaken);
 use Cisco::UCS::Blade::CPU;
 use Cisco::UCS::Common::PowerStats;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 our @ATTRIBUTES	= qw(association availability discovery dn model name operability presence revision serial uuid vendor);
 
@@ -116,12 +116,12 @@ sub get_cpus {
 	my $cpus = $self->{ucs}->resolve_children( dn => "$self->{dn}/board" )->{outConfigs}->{processorUnit};
 	my @cpus;
 
-	while ( my ( $id, $cpu ) = each %$cpus ) {
-		$cpu->{id} = $id;
+	while ( my ( $cid, $cpu ) = each %$cpus ) {
+		$cpu->{id} = $cid;
 		$cpu = Cisco::UCS::Blade::CPU->new( $self->{ucs}, $cpu );
 		push @cpus, $cpu;
-		$self->{cpu}->{$id} = $cpu;
-		return $cpu if ( $cpu->id == $id )
+		$self->{cpu}->{$cid} = $cpu;
+		return $cpu if ( defined $id and $cid == $id )
 	}
 
 	return @cpus;
@@ -228,6 +228,23 @@ Returns the chassis ID of the chassis in which the specified blade is located.
 
 returns the checkpoint status of the specified blade.
 
+=head3 cpu ( $id )
+
+Returns the specified CPU in the socket designated by the value of the $id parameter as
+a L<Cisco::UCS::Blade::CPU> object.
+
+B<Note> that this is a caching method and will return a previously retrieved and cached
+object if one is available.  See the method description for B<get_cpu> below for non-caching
+behaviour.
+
+=head3 get_cpu ( $id )
+
+This is a functionally equivalent non-caching implementation of the B<cpu> method.
+
+=head3 get_cpus ( $id )
+
+Returns all CPUs in the target blade as an array of L<Cisco::UCS::Blade::CPU> objects.
+
 =head3 description
 
 Returns the value of the user description field for the specified blade.
@@ -282,7 +299,7 @@ Returns the number of CPU cores in the specified blade.
 
 =head3 num_cpus
 
-Returns the number of CPUs in teh specified blade.
+Returns the number of CPUs in the specified blade.
 
 =head3 num_eth_ifs
 

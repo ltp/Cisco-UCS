@@ -12,14 +12,15 @@ our %V_MAP = (
 	inputCurrentAvg	=> 'input_current_avg',
 	inputCurrentMin => 'input_current_min',
 	inputCurrentMax => 'input_current_max',
-	intervals	=> 'intervals',
-	temperatureAvg	=> 'temperature_avg',
+	#intervals	=> 'intervals',
 	temperature	=> 'temperature',
+	temperatureAvg	=> 'temperature_avg',
+	temperatureMin	=> 'temperature_min',
 	temperatureMax	=> 'temperature_max',
 	thresholded	=> 'thresholded',
 	suspect		=> 'suspect',
 	timeCollected	=> 'time_collected',
-	update		=> 'update'
+	#update		=> 'update'
 );
 
 { no strict 'refs';
@@ -50,23 +51,29 @@ __END__
 
 =head1 NAME
 
-Cisco::UCS::Common::PowerStats - Class for operations with a Cisco UCS Common::PowerStats power usage statistics.
+Cisco::UCS::Common::EnvironmentalStats - Class for operations with Cisco UCS environmental stati.
 
 =cut
 
 =head1 SYNOPSIS
 
 	# Print all blades in all chassis along with a cacti-style listing of the
-	# blades current, minimum and maximum power consumption values.
+	# blades current, maximum and average CPU temperature values.
 
 	map { 
 		print "Chassis: " . $_->id ."\n";
-		map { print "\tCommon::PowerStats: ". $_->id ." - Power consumed -"
-			  . " Current:". $_->power_stats->consumed_power 
-			  . " Max:". $_->power_stats->consumed_power_max 
-			  . " Min:". $_->power_stats->consumed_power_min ."\n" 
-		} 
-		sort { $a->id <=> $b->id } $_->get_blades
+		map { 
+			print "\tBlade: ". $_->id;
+			map {
+				print "\n\t\tCPU: ". $_->id 
+				. "\n\t\t\tCurrent:". $_->env_stats->temperature
+				. "\n\t\t\tMax:". $_->env_stats->temperature_max 
+				. "\n\t\t\tAvg:". $_->env_stats->temperature_avg ."\n" 
+
+			}   
+			sort { $a->id <=> $b->id } $_->get_cpus
+		}   
+		sort { $a->id <=> $b->id } $_->get_blades 
 	} 
 	sort { 
 		$a->id <=> $b->id 
@@ -75,90 +82,77 @@ Cisco::UCS::Common::PowerStats - Class for operations with a Cisco UCS Common::P
 	# Prints something like:
 	#
 	# Chassis: 1
-	#	Blade: 1 - Power consumed - Current:115.656647 Max:120.913757 Min:110.399513
-	#	Blade: 2 - Power consumed - Current:131.427994 Max:139.313675 Min:126.170883
-	#	Blade: 3 - Power consumed - Current:131.427994 Max:157.713593 Min:126.170883
-	#	Blade: 4 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 5 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 6 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 7 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 8 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	# Chassis: 2
-	#	Blade: 1 - Power consumed - Current:131.427994 Max:136.685120 Min:128.799438
-	#	Blade: 2 - Power consumed - Current:126.170883 Max:131.427994 Min:123.542320
-	#	Blade: 3 - Power consumed - Current:134.056564 Max:155.085037 Min:131.427994
+	#	Blade: 1
+	#		CPU: 1
+	#			Current:32.500000
+	#			Max:33.000000
+	#			Avg:32.375000
+	#
+	#		CPU: 2
+	#			Current:37.000000
+	#			Max:37.000000
+	#			Avg:32.500000
+	#	Blade: 2
+	#		CPU: 1
+	#			Current:45.500000
+	#			Max:46.000000
+	#			Avg:45.666668
 	# ...etc.
 
 =head1 DECRIPTION
 
-Cisco::UCS::Common::PowerStats is a class providing operations with a Cisco UCS Common::PowerStats.
+Cisco::UCS::Common::EnvironmentalStats is a class providing operations with Cisco UCS environmental stati.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::PowerStats object
-is created automatically by method calls on a L<Cisco::UCS::Blade> object.
+Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::EnvironmentalStats
+object is created automatically by method calls on a L<Cisco::UCS::Blade> object.
 
 =cut
 
 =head1 METHODS
 
-=head3 consumed_power
-
-Returns the current power consumed value for the blade.
-
-=head3 consumed_power_avg
-
-Returns the current average power consumed value for the blade.
-
-=head3 consumed_power_min
-
-Returns the current minimum power consumed value for the blade.
-
-=head3 consumed_power_max
-
-Returns the current maximum power consumed value for the blade.
-
 =head3 input_current
 
-Returns the current input current value for the blade.
+Returns the current input current value for the target object.
 
 =head3 input_current_avg
 
-Returns the current average input current value for the blade.
+Returns the current average input current value for the target object.
 
 =head3 input_current_min
 
-Returns the current minimum input current value for the blade.
+Returns the current minimum input current value for the target object.
 
 =head3 input_current_max
 
-Returns the current maximum input current value for the blade.
+Returns the current maximum input current value for the target object.
 
-=head3 input_voltage
+=head3 temperature
 
-Returns the current input voltage value for the blade.
+Returns the current temperature value for the target object.
 
-=head3 input_voltage_avg
+=head3 temperature_avg
 
-Returns the current average input voltage value for the blade.
+Returns the average temperature value for the target object.
 
-=head3 input_voltage_min
+=head3 temperature_max
 
-Returns the current minimum input voltage value for the blade.
+Returns the maximum temperature value for the target object.
 
-=head3 input_voltage_max
+=head3 temperature_min
 
-Returns the current maximum input voltage value for the blade.
+Returns the minimum temperature value for the target object.
 
 =head3 thresholded
 
-Returns the input power thresholded state for the blade.
+Flag to indicate if the environmental status is in a thresholded state.
 
 =head3 suspect
 
-Returns the input power suspect state for the blade.
+Flag to indicate if the environmental status is in a suspect state.
 
 =head3 time_collected
 
-Returns the timestamp at which time the power statsitics were collected.
+Returns the timestamp at which time the status information were collected.
 
 =head1 AUTHOR
 
@@ -166,8 +160,8 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-Common::PowerStats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common::PowerStats>.  I will 
+Please report any bugs or feature requests to C<bug-cisco-ucs-common-environmentalstats at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-EnvironmentalStats>.  I will 
 be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
 
@@ -175,7 +169,7 @@ be notified, and then you'll automatically be notified of progress on your bug a
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Cisco::UCS::Common::PowerStats
+    perldoc Cisco::UCS::Common::EnvironmentalStats
 
 
 You can also look for information at:
@@ -184,19 +178,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Common::PowerStats>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Common-EnvironmentalStats>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Cisco-UCS-Common::PowerStats>
+L<http://annocpan.org/dist/Cisco-UCS-Common-EnvironmentalStats>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Cisco-UCS-Common::PowerStats>
+L<http://cpanratings.perl.org/d/Cisco-UCS-Common-EnvironmentalStats>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Cisco-UCS-Common::PowerStats/>
+L<http://search.cpan.org/dist/Cisco-UCS-Common-EnvironmentalStats/>
 
 =back
 
