@@ -6,6 +6,7 @@ use strict;
 use Carp 		qw(croak);
 use Scalar::Util 	qw(weaken);
 use Cisco::UCS::Blade::CPU;
+use Cisco::UCS::Blade::PowerBudget;
 use Cisco::UCS::Common::PowerStats;
 
 our $VERSION = '0.3';
@@ -99,6 +100,12 @@ sub power_stats {
 	my $self = shift;
 	return Cisco::UCS::Common::PowerStats->new( 
 		$self->{ucs}->resolve_dn( dn => "$self->{dn}/board/power-stats" )->{outConfig}->{computeMbPowerStats} )
+}
+
+sub power_budget {
+	my $self = shift;
+	return Cisco::UCS::Blade::PowerBudget->new(
+		$self->{ucs}->resolve_dn( dn => "$self->{dn}/budget" )->{outConfig}->{powerBudget} )
 }
 
 sub cpu {
