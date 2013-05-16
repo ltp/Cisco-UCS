@@ -3,6 +3,7 @@ package Cisco::UCS::Chassis;
 use warnings;
 use strict;
 
+use Cisco::UCS::Chassis::Stats;
 use Cisco::UCS::FEX;
 use Cisco::UCS::Common::FanModule;
 use Cisco::UCS::Common::Fan;
@@ -263,6 +264,12 @@ Returns an array of L<Cisco::UCS::PSU> objects for the given chassis.  This meth
 sub get_psus {
 	my ($self, $id)= @_;
 	return $self->_get_child_objects(id => $id, type => 'equipmentPsu', class => 'Cisco::UCS::Common::PSU', attr => 'psu');
+}
+
+sub stats {
+        my $self = shift;
+        return Cisco::UCS::Chassis::Stats->new( 
+                $self->{ucs}->resolve_dn( dn => "$self->{dn}/stats" )->{outConfig}->{equipmentChassisStats} )
 }
 
 =head3 admin_state
