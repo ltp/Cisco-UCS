@@ -8,7 +8,6 @@ use Scalar::Util qw(weaken);
 our $VERSION = '0.01';
 
 our %V_MAP = (
-	dn		=> 'dn',
 	inputPower	=> 'input_power',
 	inputPowerAvg	=> 'input_power_avg',
 	inputPowerMax	=> 'input_power_max',
