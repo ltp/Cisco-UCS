@@ -13,7 +13,6 @@ our %V_MAP = (
 	inputPowerAvg	=> 'input_power_avg',
 	inputPowerMax	=> 'input_power_max',
 	inputPowerMin	=> 'input_power_min',
-	intervals	=> 'intervals',
 	outputPower	=> 'output_power',
 	outputPowerAvg	=> 'output_power_avg',
 	outputPowerMax	=> 'output_power_max',
@@ -21,7 +20,6 @@ our %V_MAP = (
 	thresholded	=> 'thresholded',
 	suspect		=> 'suspect',
 	timeCollected	=> 'time_collected',
-	update		=> 'update',
 );
 
 { no strict 'refs';
@@ -58,97 +56,89 @@ Cisco::UCS::Chassis::Stats - Class for operations with Cisco UCS chassis power s
 
 =head1 SYNOPSIS
 
-	# Print all blades in all chassis along with a cacti-style listing of the
-	# blades current, minimum and maximum power consumption values.
+	# Print all blades in all chassis along with the chassis current output power
+	# and each blades current input power both in watts and as a percentage of
+	# the chassis input power level.
 
 	map { 
-		print "Chassis: " . $_->id ."\n";
-		map { print "\tBlade: ". $_->id ." - Power consumed -"
-			  . " Current:". $_->power_stats->consumed_power 
-			  . " Max:". $_->power_stats->consumed_power_max 
-			  . " Min:". $_->power_stats->consumed_power_min ."\n" 
-		} 
-		sort { $a->id <=> $b->id } $_->get_blades
+		my $c_power = $_->stats->output_power;
+		printf( "Chassis: %d - Output power: %.3f\n", $_->id, $c_power );
+		map {
+			printf( "\tBlade: %d - Input power: %.3f (%.2f%%)\n",
+			$_->id, $_->power_budget->current_power, 
+			( $c_power == 0 ? '-' : ( $_->power_budget->current_power / $c_power * 100 ) ) ) 
+		}   
+		sort { $a->id <=> $b->id } $_->get_blades 
 	} 
 	sort { 
 		$a->id <=> $b->id 
 	} $ucs->get_chassiss;
 
-	# Prints something like:
+	# E.g.
 	#
-	# Chassis: 1
-	#	Blade: 1 - Power consumed - Current:115.656647 Max:120.913757 Min:110.399513
-	#	Blade: 2 - Power consumed - Current:131.427994 Max:139.313675 Min:126.170883
-	#	Blade: 3 - Power consumed - Current:131.427994 Max:157.713593 Min:126.170883
-	#	Blade: 4 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 5 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 6 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 7 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	#	Blade: 8 - Power consumed - Current:0.000000 Max:0.000000 Min:0.000000
-	# Chassis: 2
-	#	Blade: 1 - Power consumed - Current:131.427994 Max:136.685120 Min:128.799438
-	#	Blade: 2 - Power consumed - Current:126.170883 Max:131.427994 Min:123.542320
-	#	Blade: 3 - Power consumed - Current:134.056564 Max:155.085037 Min:131.427994
-	# ...etc.
+	# Chassis: 1 - Output power: 704.000
+	#	Blade: 1 - Input power: 119.000 (16.90%)
+	#	Blade: 2 - Input power: 134.000 (19.03%)
+	#	Blade: 3 - Input power: 135.000 (19.18%)
+	#	Blade: 4 - Input power: 0.000 (0.00%)
+	#	Blade: 5 - Input power: 0.000 (0.00%)
+	#	Blade: 6 - Input power: 0.000 (0.00%)
+	#	Blade: 7 - Input power: 0.000 (0.00%)
+	#	Blade: 8 - Input power: 136.000 (19.32%)
+	# Chassis: 2 - Output power: 1188.000
+	#	Blade: 1 - Input power: 127.000 (10.69%)
+	#	Blade: 2 - Input power: 0.000 (0.00%)
+	#	Blade: 3 - Input power: 120.000 (10.10%)
+	#	Blade: 4 - Input power: 0.000 (0.00%)
+	#	Blade: 5 - Input power: 127.000 (10.69%)
+	#	Blade: 6 - Input power: 121.000 (10.19%)
+	#	Blade: 7 - Input power: 172.000 (14.48%)
+	#	Blade: 8 - Input power: 136.000 (11.45%)
+	# etc.
+
 
 =head1 DECRIPTION
 
-Cisco::UCS::Common::PowerStats is a class providing operations with a Cisco UCS power usage statistics.
+Cisco::UCS::Chassis::Stats is a class providing operations with a Cisco UCS chassis power statistics.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::PowerStats object
-is created automatically by method calls on a L<Cisco::UCS::Blade> object.
+Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Chassis::Stats 
+object is created automatically by method calls on a L<Cisco::UCS::Chassis> object.
 
 =cut
 
 =head1 METHODS
 
-=head3 consumed_power
+=head3 input_power
 
-Returns the current power consumed value for the blade.
+Returns the current input power for the chassis.
 
-=head3 consumed_power_avg
+=head3 input_power_avg
 
-Returns the current average power consumed value for the blade.
+Returns the average input power value for the chassis.
 
-=head3 consumed_power_min
+=head3 input_power_min
 
-Returns the current minimum power consumed value for the blade.
+Returns the minimum power input value for the chassis.
 
-=head3 consumed_power_max
+=head3 input_power_max
 
-Returns the current maximum power consumed value for the blade.
+Returns the maximum power input value for the chassis.
 
-=head3 input_current
+=head3 output_power
 
-Returns the current input current value for the blade.
+Returns the current output power value for the chassis.
 
-=head3 input_current_avg
+=head3 output_power_avg
 
-Returns the current average input current value for the blade.
+Returns the average output power value for the chassis.
 
-=head3 input_current_min
+=head3 output_power_min
 
-Returns the current minimum input current value for the blade.
+Returns the minimum output power value for the chassis.
 
-=head3 input_current_max
+=head3 output_power_max
 
-Returns the current maximum input current value for the blade.
-
-=head3 input_voltage
-
-Returns the current input voltage value for the blade.
-
-=head3 input_voltage_avg
-
-Returns the current average input voltage value for the blade.
-
-=head3 input_voltage_min
-
-Returns the current minimum input voltage value for the blade.
-
-=head3 input_voltage_max
-
-Returns the current maximum input voltage value for the blade.
+Returns the maximum output power value for the blade.
 
 =head3 thresholded
 
@@ -168,8 +158,8 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-common-powerstats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PowerStats>.  I will 
+Please report any bugs or feature requests to C<bug-cisco-ucs-chassis-stats at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Chassis-Stats>.  I will 
 be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
 
@@ -177,7 +167,7 @@ be notified, and then you'll automatically be notified of progress on your bug a
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Cisco::UCS::Common::PowerStats
+    perldoc Cisco::UCS::Chassis::Stats
 
 
 You can also look for information at:
@@ -186,19 +176,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Common-PowerStats>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Chassis-Stats>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Cisco-UCS-Common-PowerStats>
+L<http://annocpan.org/dist/Cisco-UCS-Chassis-Stats>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Cisco-UCS-Common-PowerStats>
+L<http://cpanratings.perl.org/d/Cisco-UCS-Chassis-Stats>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Cisco-UCS-Common-PowerStats/>
+L<http://search.cpan.org/dist/Cisco-UCS-Chassis-Stats/>
 
 =back
 
