@@ -266,6 +266,15 @@ sub get_psus {
 	return $self->_get_child_objects(id => $id, type => 'equipmentPsu', class => 'Cisco::UCS::Common::PSU', attr => 'psu');
 }
 
+=head3 stats
+
+  print "Output power: ". $ucs->chassis(1)->stats->output_power ." W\n";
+
+Return a L<Cisco::UCS::Chassis::Stats> object containing the current power statistics
+for the specified chassis.
+
+=cut
+
 sub stats {
         my $self = shift;
         return Cisco::UCS::Chassis::Stats->new( 

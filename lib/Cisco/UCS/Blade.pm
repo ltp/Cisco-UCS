@@ -336,6 +336,11 @@ Returns the operational status of the specified blade.
 
 Returns the presence status of the specified blade.
 
+=head3 power_budget
+
+Returns a L<Cisco::UCS::Blade::PowerBudget> object representing the power budget
+values for the specified blade.
+
 =head3 power_stats
 
 Returns a L<Cisco::UCS::Common::PowerStats> object representing the power usage
