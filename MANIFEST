@@ -7,8 +7,10 @@ lib/Cisco/UCS/Interconnect.pm
 lib/Cisco/UCS/MgmtEntity.pm
 lib/Cisco/UCS/FEX.pm
 lib/Cisco/UCS/Chassis.pm
+lib/Cisco/UCS/Chassis/Stats.pm
 lib/Cisco/UCS/Blade.pm
 lib/Cisco/UCS/Blade/CPU.pm
+lib/Cisco/UCS/Blade/PowerBudget.pm
 lib/Cisco/UCS/ServiceProfile.pm
 lib/Cisco/UCS/Fault.pm
 lib/Cisco/UCS/Common/FanModule.pm

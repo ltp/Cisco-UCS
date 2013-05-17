@@ -1,5 +1,11 @@
 Revision history for Cisco-UCS
 
+0.33	Fri May 17 2013 <ltp@cpan.org>
+	- Added Cisco::UCS::Blade::PowerBudget
+	- Added Cisco::UCS::Chassis::Stats
+	- Updated Cisco::UCS::Blade to add new method for retreiving power budget stats.
+	- Updated Cisco::UCS::Chassis to add new method for retreiving environmental stats..
+
 0.32	Wed May 15 2013 <ltp@cpan.org>
 	- Added Cisco::UCS::Blade::CPU
 	- Added Cisco::UCS::Common::PowerStats
