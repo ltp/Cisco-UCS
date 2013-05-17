@@ -8,7 +8,7 @@ use Carp		qw(croak);
 
 use vars qw($VERSION);
 
-$VERSION	= '0.2';
+$VERSION	= '0.3';
 
 our @ATTRIBUTES = qw(dn id model operability power presence revision serial thermal tray vendor voltage);
 
@@ -16,6 +16,24 @@ our %ATTRIBUTES	= (
 			performance	=> 'perf',
 			oper_state	=> 'operState'
 		);
+
+{
+	no strict 'refs';
+
+	while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
+		*{ __PACKAGE__ . '::' . $pseudo } = sub {
+			my $self = shift;
+			return $self->{$attribute}
+		}   
+	}   
+	
+	foreach my $attribute (@ATTRIBUTES) {
+		*{ __PACKAGE__ . '::' . $attribute } = sub {
+			my $self = shift;
+			return $self->{$attribute}
+		}
+	}
+}
 
 sub new {
 	my ($class, %args) = @_;
@@ -31,6 +49,10 @@ sub new {
 
 	return $self;
 }
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -173,22 +195,3 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-{
-	no strict 'refs';
-
-	while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
-		*{ __PACKAGE__ . '::' . $pseudo } = sub {
-			my $self = shift;
-			return $self->{$attribute}
-		}   
-	}   
-	
-	foreach my $attribute (@ATTRIBUTES) {
-		*{ __PACKAGE__ . '::' . $attribute } = sub {
-			my $self = shift;
-			return $self->{$attribute}
-		}
-	}
-}
-
-1;
