@@ -11,11 +11,7 @@ use Cisco::UCS::Common::PSU;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
-use vars qw($VERSION @ISA);
-
-@ISA		= qw(Cisco::UCS);
-
-$VERSION	= '0.2';
+our $VERSION	= '0.2';
 
 our @ATTRIBUTES	= qw(dn error id model operability power presence serial thermal vendor);
 
@@ -29,6 +25,107 @@ our %ATTRIBUTES = (
 			seeprom_oper_state	=> 'seepromOperState'
                 );
 
+{
+        no strict 'refs';
+
+        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
+                *{ __PACKAGE__ . '::' . $pseudo } = sub {
+                        my $self = shift;
+                        return $self->{$attribute}
+                }
+        }
+
+        foreach my $attribute (@ATTRIBUTES) {
+                *{ __PACKAGE__ . '::' . $attribute } = sub {
+                        my $self = shift;
+                        return $self->{$attribute}
+                }   
+        } 
+}
+
+sub new {
+	my ($class, %args) = @_;
+	my $self = {};
+	bless $self, $class;
+	defined $args{dn}	? $self->{dn}   = $args{dn}     	: croak 'dn not defined';
+	defined $args{ucs}	? weaken($self->{ucs}  = $args{ucs})    : croak 'ucs not defined';
+	my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentChassis}};
+
+	while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+
+	return $self;
+}
+
+sub blade {
+	my ($self, $id) = @_;
+	return ( defined $self->{blade}->{$id} ? $self->{blade}->{$id} : $self->get_blades($id) )
+}
+
+sub get_blade {
+	my ($self, $id) = @_;
+	return ( $id ? $self->get_blades($id) : undef );
+}
+
+sub get_blades {
+        my ($self, $id)= @_;
+	return $self->_get_child_objects(id => $id, type => 'computeBlade', class => 'Cisco::UCS::Blade', attr => 'blade', 
+					uid => 'slotId', class_filter => { classId => 'computeBlade', chassisId => $self->{id} } );
+}
+
+sub fex {
+	my ($self, $id) = @_;
+	return ( defined $self->{fex}->{$id} ? $self->{fex}->{$id} : $self->get_fexs($id) )
+}
+
+sub get_fex {
+	my ($self, $id) = @_;
+	return ( $id ? $self->get_fexs($id) : undef );
+}
+
+sub get_fexs {
+	my ($self, $id) = @_;
+	return $self->_get_child_objects(id => $id, type => 'equipmentIOCard', class => 'Cisco::UCS::FEX', attr => 'fex');
+}
+
+sub fan_module {
+	my ($self, $id) = @_;
+	return ( defined $self->{fan_module}->{$id} ? $self->{fan_module}->{$id} : $self->get_fan_module($id) )
+}
+
+sub get_fan_module {
+	my ($self, $id) = @_;
+	return ( $id ? $self->get_fan_modules($id) : undef );
+}
+
+sub get_fan_modules {
+	my ($self, $id)	= @_;
+	return $self->_get_child_objects(id => $id, type => 'equipmentFanModule', class => 'Cisco::UCS::Common::FanModule', attr => 'fan_module');
+}
+
+sub psu {
+	my ($self, $id) = @_;
+	return ( defined $self->{psu}->{$id} ? $self->{psu}->{$id} : $self->get_psus($id) )
+}
+
+sub get_psu {
+        my ($self, $id)=@_;
+        return $self->get_psu($id)
+}
+
+sub get_psus {
+	my ($self, $id)= @_;
+	return $self->_get_child_objects(id => $id, type => 'equipmentPsu', class => 'Cisco::UCS::Common::PSU', attr => 'psu');
+}
+
+sub stats {
+        my $self = shift;
+        return Cisco::UCS::Chassis::Stats->new( 
+                $self->{ucs}->resolve_dn( dn => "$self->{dn}/stats" )->{outConfig}->{equipmentChassisStats} )
+}
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -53,21 +150,6 @@ is created automatically via calls to a L<Cisco::UCS> object like I<get_chassis>
 
 =head2 METHODS
 
-=cut
-
-sub new {
-	my ($class, %args) = @_;
-	my $self = {};
-	bless $self, $class;
-	defined $args{dn}	? $self->{dn}   = $args{dn}     	: croak 'dn not defined';
-	defined $args{ucs}	? weaken($self->{ucs}  = $args{ucs})    : croak 'ucs not defined';
-	my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentChassis}};
-
-	while (my ($k, $v) = each %attr) { $self->{$k} = $v }
-
-	return $self;
-}
-
 =head3 blade ( $id )
 
   my $blade = $ucs->chassis(1)->blade(2);
@@ -80,13 +162,6 @@ takes a single mandatory argument - an integer value specifying the slot ID of t
 Note that the default behaviour of this method is to return a cached object retrieved in a previous
 lookup if one is available.  Please see the B<Caching Methods> section in B<NOTES> for further 
 information.
-
-=cut
-
-sub blade {
-	my ($self, $id) = @_;
-	return ( defined $self->{blade}->{$id} ? $self->{blade}->{$id} : $self->get_blades($id) )
-}
 
 =head3 get_blade ( $id )
 
@@ -101,13 +176,6 @@ Returns a L<Cisco::UCS::Blade> object for the specified blade identified by the 
 This method always queries the UCSM for information on the specified blade - contrast this
 behaviour with the behaviour of the analogous caching method I<blade()>;
 
-=cut
-
-sub get_blade {
-	my ($self, $id) = @_;
-	return ( $id ? $self->get_blades($id) : undef );
-}
-
 =head3 get_blades
 
   foreach my $blade ($ucs->chassis(1)->get_blades) {
@@ -115,14 +183,6 @@ sub get_blade {
   }
 
 Returns an array of L<Cisco::UCS::Blade> objects.  This is a non-caching method.
-
-=cut
-
-sub get_blades {
-        my ($self, $id)= @_;
-	return $self->_get_child_objects(id => $id, type => 'computeBlade', class => 'Cisco::UCS::Blade', attr => 'blade', 
-					uid => 'slotId', class_filter => { classId => 'computeBlade', chassisId => $self->{id} } );
-}
 
 =head3 fex ( $id )
 
@@ -137,13 +197,6 @@ Note that the default behaviour of this method is to return a cached object retr
 lookup if one is available.  Please see the B<Caching Methods> section in B<NOTES> for further 
 information.
 
-=cut
-
-sub fex {
-	my ($self, $id) = @_;
-	return ( defined $self->{fex}->{$id} ? $self->{fex}->{$id} : $self->get_fexs($id) )
-}
-
 =head3 get_fex ( $id )
 
   my $fex = $ucs->chassis(1)->fex(1);
@@ -155,26 +208,12 @@ Returns a L<Cisco::UCS::FEX> object for the FEX identified by the given slot ID.
 This method always queries the UCSM for information - contrast this with the behaviour of 
 the analagous caching method I<fex()>.
 
-=cut
-
-sub get_fex {
-	my ($self, $id) = @_;
-	return ( $id ? $self->get_fexs($id) : undef );
-}
-
 =head3 get_fexs
 
   my @fex = $ucs->chassis(1)->get_fexs;
 
 Returns an array of L<Cisco::UCS::FEX> objects for the FEXs in the specified chassis.  This
 is a non-caching method.
-
-=cut
-
-sub get_fexs {
-	my ($self, $id) = @_;
-	return $self->_get_child_objects(id => $id, type => 'equipmentIOCard', class => 'Cisco::UCS::FEX', attr => 'fex');
-}
 
 =head3 fan_module ( $id )
 
@@ -184,13 +223,6 @@ Returns a L<Cisco::UCS::Common::FanModule> object for the specified fan module. 
 the default behaviour of this method is to return a cached object as retrieved by a previous
 call to the UCSM if available.  See the B<Caching Method> section in B<NOTES> for further details.
 
-=cut
-
-sub fan_module {
-	my ($self, $id) = @_;
-	return ( defined $self->{fan_module}->{$id} ? $self->{fan_module}->{$id} : $self->get_fan_module($id) )
-}
-
 =head3 get_fan_module ( $id )
 
   my $fm = $ucs->chassis(1)->get_fan_module(1);
@@ -199,25 +231,11 @@ Returns a L<Cisco::UCS::Common::FanModule> object for the specified fan module i
 
 This is a non-caching method and always queries the UCSM for information.
 
-=cut
-
-sub get_fan_module {
-	my ($self, $id) = @_;
-	return ( $id ? $self->get_fan_modules($id) : undef );
-}
-
 =head3 get_fan_modules
 
   my @fan_modules = $ucs->chassis(3)->get_fan_modules;
 
 Returns an array of L<Cisco::UCS::Common::FanModules> for the specified chassis.  This is a non-caching method.
-
-=cut
-
-sub get_fan_modules {
-	my ($self, $id)	= @_;
-	return $self->_get_child_objects(id => $id, type => 'equipmentFanModule', class => 'Cisco::UCS::Common::FanModule', attr => 'fan_module');
-}
 
 =head3 psu ( $id )
 
@@ -232,13 +250,6 @@ Note that the default behaviour of this method is to return a cached object retr
 lookup if one is available.  Please see the B<Caching Methods> section in B<NOTES> for further 
 information.
 
-=cut
-
-sub psu {
-	my ($self, $id) = @_;
-	return ( defined $self->{psu}->{$id} ? $self->{psu}->{$id} : $self->get_psus($id) )
-}
-
 =head3 get_psu ( $id )
 
   my $psu = $ucs->chassis(1)->get_psu(1);
@@ -246,25 +257,11 @@ sub psu {
 Returns a L<Cisco::UCS::Common::PSU> object for the chassis identified by the given PSU ID.
 This method is non-caching and will always query the UCSM for information.
 
-=cut
-
-sub get_psu {
-        my ($self, $id)=@_;
-        return $self->get_psu($id)
-}
-
 =head3 get_psus
 
   my @psus = $ucs->chassis(1)->get_psus;
 
 Returns an array of L<Cisco::UCS::PSU> objects for the given chassis.  This method is non-caching.
-
-=cut
-
-sub get_psus {
-	my ($self, $id)= @_;
-	return $self->_get_child_objects(id => $id, type => 'equipmentPsu', class => 'Cisco::UCS::Common::PSU', attr => 'psu');
-}
 
 =head3 stats
 
@@ -272,14 +269,6 @@ sub get_psus {
 
 Return a L<Cisco::UCS::Chassis::Stats> object containing the current power statistics
 for the specified chassis.
-
-=cut
-
-sub stats {
-        my $self = shift;
-        return Cisco::UCS::Chassis::Stats->new( 
-                $self->{ucs}->resolve_dn( dn => "$self->{dn}/stats" )->{outConfig}->{equipmentChassisStats} )
-}
 
 =head3 admin_state
 
@@ -422,23 +411,3 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
-
-{
-        no strict 'refs';
-
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
-                *{ __PACKAGE__ . '::' . $pseudo } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }
-        }
-
-        foreach my $attribute (@ATTRIBUTES) {
-                *{ __PACKAGE__ . '::' . $attribute } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }   
-        } 
-}
-
-1;
