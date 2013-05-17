@@ -15,7 +15,7 @@ use vars qw($VERSION @ISA);
 
 @ISA		= qw(Cisco::UCS);
 
-$VERSION	= '0.1';
+$VERSION	= '0.2';
 
 our @ATTRIBUTES	= qw(dn error id model operability power presence serial thermal vendor);
 
