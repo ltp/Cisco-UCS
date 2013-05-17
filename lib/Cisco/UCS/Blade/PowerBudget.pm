@@ -13,7 +13,6 @@ our %V_MAP = (
 	capAction	=> 'cap_action',
 	catalogPower	=> 'catalog_power',
 	currentPower	=> 'current_power',
-	dn		=> 'dn',
 	dynRealloc	=> 'dyn_reallocation',
 	groupName	=> 'group_name',
 	idlePower	=> 'idle_power',
@@ -118,27 +117,89 @@ is created automatically by method calls on a L<Cisco::UCS::Blade> object.
 =head1 METHODS
 
 =head3 admin_commited
+
+Returns the administrative commited power level of the blade.
+
 =head3 admin_peak
+
+Returns the administrative peak power level of the blade.
+
 =head3 cap_action
+
+Returns the power cap action of the blade.
+
 =head3 catalog_power
+
+Returns the catalog power level of the blade.
+
 =head3 current_power
-=head3 dn
+
+Returns the current power level of the blade.
+
 =head3 dyn_reallocation
+
+Returns the power dynamic reallocation policy of the blade.
+
 =head3 group_name
+
+Returns the power group name of the blade.
+
 =head3 idle_power
+
+Returns the idle power level of the blade.
+
 =head3 max_power
+
+Returns the maximum power level of the blade.
+
 =head3 min_power
+
+Returns the minimum power level of the blade.
+
 =head3 oper_commited
+
+Returns the operator committed power level of the blade.
+
 =head3 oper_min
+
+Returns the operator committed minimum power level of the blade.
+
 =head3 oper_peak
+
+Returns the operator committed peak power level of the blade.
+
 =head3 oper_state
+
+Returns the operational power state of the blade.
+
 =head3 priority
+
+Returns the administrative power priority of the blade.
+
 =head3 psu_capacity
+
+Returns the PSU capacity.
+
 =head3 psu_state
+
+Returns the PSU state.
+
 =head3 scaled_wt
+
+Returns the scaled weighted threshold of the blade power budget.
+
 =head3 style
+
+Returns the power budget management style of the blade.
+
 =head3 update_time
+
+Returns a timestamp at which time the last time power budget statistics 
+and information were last updated.
+
 =head3 weight
+
+Returns the power budget weight for the blade.
 
 =head1 AUTHOR
 
