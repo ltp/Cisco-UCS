@@ -11,7 +11,7 @@ use Cisco::UCS::Common::PSU;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
-our $VERSION	= '0.2';
+our $VERSION	= '0.3';
 
 our @ATTRIBUTES	= qw(dn error id model operability power presence serial thermal vendor);
 
