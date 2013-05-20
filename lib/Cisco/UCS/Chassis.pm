@@ -3,44 +3,45 @@ package Cisco::UCS::Chassis;
 use warnings;
 use strict;
 
-use Cisco::UCS::Chassis::Stats;
 use Cisco::UCS::FEX;
 use Cisco::UCS::Common::FanModule;
 use Cisco::UCS::Common::Fan;
 use Cisco::UCS::Chassis::PSU;
+use Cisco::UCS::Chassis::Stats;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 use vars qw($VERSION @ISA);
 
 $VERSION	= '0.3';
 @ISA	= qw(Cisco::UCS);
-our @ATTRIBUTES	= qw(dn error id model operability power presence serial thermal vendor);
 our %ATTRIBUTES = (
-			admin_state		=> 'adminState',
-			conn_path		=> 'connPath',
-			conn_status		=> 'connStatus',
-			label			=> 'usrLbl',
-			managing_instance	=> 'managingInst',
-			oper_state		=> 'operState',
-			seeprom_oper_state	=> 'seepromOperState'
+			adminState	=> 'admin_state',
+			connPath	=> 'conn_path',
+			connStatus	=> 'conn_status',
+			dn		=> 'dn',
+			id		=> 'id',
+			managingInst	=> 'managing_inst',
+			model		=> 'model',
+			operState	=> 'oper_state',
+			operability	=> 'operability',
+			power		=> 'power',
+			presence	=> 'presence',
+			seepromOperState=> 'seeprom_oper_state'
+			serial		=> 'serial',
+			thermal		=> 'thermal',
+			usrLbl		=> 'label',
+			vendor		=> 'vendor',
                 );
 
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
+        while ( my ($attribute, $pseudo) = each %ATTRIBUTES ) {
                 *{ __PACKAGE__ . '::' . $pseudo } = sub {
                         my $self = shift;
                         return $self->{$attribute}
                 }
         }
-
-        foreach my $attribute (@ATTRIBUTES) {
-                *{ __PACKAGE__ . '::' . $attribute } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }   
-        } 
 }
 
 sub new {
