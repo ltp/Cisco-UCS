@@ -8,13 +8,14 @@ use Cisco::UCS::FEX;
 use Cisco::UCS::Common::FanModule;
 use Cisco::UCS::Common::Fan;
 use Cisco::UCS::Common::PSU;
+use Cisco::UCS::Chassis::PSU;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
+use vars qw($VERSION @ISA);
 
-our $VERSION	= '0.3';
-
+$VERSION	= '0.3';
+@ISA	= qw(Cisco::UCS);
 our @ATTRIBUTES	= qw(dn error id model operability power presence serial thermal vendor);
-
 our %ATTRIBUTES = (
 			admin_state		=> 'adminState',
 			conn_path		=> 'connPath',
@@ -114,7 +115,7 @@ sub get_psu {
 
 sub get_psus {
 	my ($self, $id)= @_;
-	return $self->_get_child_objects(id => $id, type => 'equipmentPsu', class => 'Cisco::UCS::Common::PSU', attr => 'psu');
+	return $self->_get_child_objects(id => $id, type => 'equipmentPsu', class => 'Cisco::UCS::Chassis::PSU', attr => 'psu');
 }
 
 sub stats {
