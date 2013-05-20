@@ -7,7 +7,6 @@ use Cisco::UCS::Chassis::Stats;
 use Cisco::UCS::FEX;
 use Cisco::UCS::Common::FanModule;
 use Cisco::UCS::Common::Fan;
-use Cisco::UCS::Common::PSU;
 use Cisco::UCS::Chassis::PSU;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
@@ -244,7 +243,7 @@ Returns an array of L<Cisco::UCS::Common::FanModules> for the specified chassis.
 
   print $psu->serial;
 
-Returns a L<Cisco::UCS::Common::PSU> object for the chassis identified by the given PSU ID.  
+Returns a L<Cisco::UCS::Chassis::PSU> object for the chassis identified by the given PSU ID.  
 This method takes a single mandatory argument - an integer value specifying the ID of the desired PSU.
 
 Note that the default behaviour of this method is to return a cached object retrieved in a previous
@@ -255,14 +254,14 @@ information.
 
   my $psu = $ucs->chassis(1)->get_psu(1);
 
-Returns a L<Cisco::UCS::Common::PSU> object for the chassis identified by the given PSU ID.
+Returns a L<Cisco::UCS::Chassis::PSU> object for the chassis identified by the given PSU ID.
 This method is non-caching and will always query the UCSM for information.
 
 =head3 get_psus
 
   my @psus = $ucs->chassis(1)->get_psus;
 
-Returns an array of L<Cisco::UCS::PSU> objects for the given chassis.  This method is non-caching.
+Returns an array of L<Cisco::UCS::Chassis::PSU> objects for the given chassis.  This method is non-caching.
 
 =head3 stats
 
