@@ -267,7 +267,7 @@ sub _ucsm_request {
 
 	my $xml = ( $class_id 
 			? $self->{parser}->XMLin($res->content, KeyAttr => $class_id) 
-			: $self->{parser}->XMLin($res->content)
+			: $self->{parser}->XMLin($res->content, KeyAttr => [ 'name', 'key', 'id', 'intId' ] )
 		);
 
 	return ( $xml->{errorCode}
