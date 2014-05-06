@@ -62,28 +62,6 @@ our %ATTRIBUTES = (
                  vcon_profile_name              => 'vconProfileName'
 		);
 
-=head1 NAME
-
-Cisco::UCS::ServiceProfile - Class for operations with a Cisco UCS Service Profile.
-
-=cut
-
-=head1 SYNOPSIS
-
-	my $profile = $ucs->service_profile('profile-1');
-	print "Profile " . $profile->name . " is bound to physical DN " . $profile->pnDn . "\n";
-
-	print $ucs->service_profile('profile-2')->uuid;
-
-=head1 DECRIPTION
-
-Cisco::UCS::ServiceProfile is a class providing operations with a Cisco UCS Service Profile.
-
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::ServiceProfile 
-object is created automatically by method calls via methods in Cisco::UCS.
-
-=cut
-
 sub new {
 	my ($class, %args) = @_;
 	my $self = {};
@@ -114,6 +92,30 @@ sub new {
                 }   
         }   
 }
+
+1;
+
+__END__
+
+=head1 NAME
+
+Cisco::UCS::ServiceProfile - Class for operations with a Cisco UCS Service Profile.
+
+=cut
+
+=head1 SYNOPSIS
+
+	my $profile = $ucs->service_profile('profile-1');
+	print "Profile " . $profile->name . " is bound to physical DN " . $profile->pnDn . "\n";
+
+	print $ucs->service_profile('profile-2')->uuid;
+
+=head1 DECRIPTION
+
+Cisco::UCS::ServiceProfile is a class providing operations with a Cisco UCS Service Profile.
+
+Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::ServiceProfile 
+object is created automatically by method calls via methods in Cisco::UCS.
 
 =head1 METHODS
 
@@ -403,5 +405,3 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
-
-1;
