@@ -1,5 +1,5 @@
 Cisco::UCS - A Perl interface to the Cisco UCS XML API
-======================================================
+------------------------------------------------------
 
 SYNOPSIS
 --------
@@ -64,45 +64,47 @@ METHODS
 -------
 * new ( CLUSTER, PORT, PROTO, USERNAME, PASSWORD )
 
-    my $ucs = Cisco::UCS->new ( cluster         => $cluster, 
-                                port            => $port,
-                                proto           => $proto,
-                                username        => $username,
-                                passwd          => $passwd
-                               );
+
+        my $ucs = Cisco::UCS->new ( cluster         => $cluster, 
+                                    port            => $port,
+                                    proto           => $proto,
+                                    username        => $username,
+                                    passwd          => $passwd
+                                   );
 
 Constructor. Creates a new Cisco::UCS object representing a
 connection to the Cisco UCSM XML API.
 
 Parameters are:
 
-** cluster
+    * cluster
 The common name of the target cluster. This name should be resolvable
 on the host from which the script is run.
 
-** username
+    * username
 The username to use for the connection. This username needs to have
 the correct permission and access for the operations that one intends
 to perform
 
-** passwd
+    * passwd
 The plaintext password of the username specified for the username
 attribute for the connection.
 
-** port
+    * port
 The port on which to connect to the UCSM XML API on the target
 cluster. This parameter is optional and will default to 443 if not
 provided.
 
-** proto
+    * proto
 The protocol with which to connect to the UCSM XML API on the target
 cluster. This value is optional hould be one of 'http' or 'https' and
 will default to 'https' if not provided.
 
 * login ()
 
-    $ucs->login;
-    print "Authentication token is $ucs->cookie\n";
+
+        $ucs->login;
+        print "Authentication token is $ucs->cookie\n";
 
 Creates a connection to the XML API interface of a USCM management
 instance. If sucessful, the attributes of the UCSM management instance
@@ -117,15 +119,17 @@ refresh.
 
 * refresh ()
 
-    $ucs->refresh;
 
-    Resets the expiry time limit of the existing authentication token to the
-    default timeout period of 10m. Usually not necessary for short-lived
-    connections.
+        $ucs->refresh;
+
+Resets the expiry time limit of the existing authentication token to the
+default timeout period of 10m. Usually not necessary for short-lived
+connections.
 
 * logout ()
 
-    $ucs->logout;
+
+        $ucs->logout;
 
 Expires the current authentication token. This method should always be
 called on completion of a script to expire the authentication token and
@@ -138,29 +142,34 @@ where a script may fail and exit before logging out;
 
 * cookie ()
 
-    print $ucs->cookie;
+
+        print $ucs->cookie;
 
 Returns the value of the authentication token.
 
 * cluster ()
-    print $ucs->cluster;
+
+
+        print $ucs->cluster;
 
 Returns the value of cluster as given in the constructor.
 
 * dn ()
 
-    print $ucs->dn;
+
+        print $ucs->dn;
 
 Returns the distinguished name that specifies the base scope of the
 Cisco::UCS object.
 
 * get_error_id ( $ID )
 
-    my %error = $ucs->get_error_id($id);
 
-    while (my($key,$value) = each %error) {
-        print "$key:\t$value\n";
-    }
+        my %error = $ucs->get_error_id($id);
+    
+        while (my($key,$value) = each %error) {
+            print "$key:\t$value\n";
+        }
 
 This method is deprecated, please use the equivalent get_error method.
 
@@ -170,8 +179,9 @@ error.
 
 * error ( $id )
  
-    my $error = $ucs->get_error($id);
-    print $error->id . ":" . $error->desc . "\n";
+
+        my $error = $ucs->get_error($id);
+        print $error->id . ":" . $error->desc . "\n";
 
 Returns a Cisco::UCS::Fault object representing the specified error.
 Note that this is a caching method and will return a cached object that
@@ -189,14 +199,14 @@ than the equivalent caching method error described above.
 
 * get_errors ()
 
-    map {
-            print '-'x50,"\n";
-            print "ID               : " . $_->id . "\n";
-            print "Severity         : " . $_->severity . "\n";
-            print "Description      : " . $_->description . "\n";
-    } grep {
-            $_->severity !~ /cleared/i;
-    } $ucs->get_errors;
+        map {
+                print '-'x50,"\n";
+                print "ID               : " . $_->id . "\n";
+                print "Severity         : " . $_->severity . "\n";
+                print "Description      : " . $_->description . "\n";
+        } grep {
+                $_->severity !~ /cleared/i;
+        } $ucs->get_errors;
 
 Returns an array of Cisco::UCS::Fault objects with each object
 representative of a fault on the target system.
@@ -227,7 +237,8 @@ what you want to do, you shouldn't need to alter this method.
 
 * resolve_dn ( %ARGS )
 
-    my $blade = $ucs->resolve_dn( dn => 'sys/chassis-1/blade-2');
+
+        my $blade = $ucs->resolve_dn( dn => 'sys/chassis-1/blade-2');
 
 This method is used to retrieve objects from the UCSM management
 heirachy by resolving a specific distinguished name (dn) for a managed
@@ -252,6 +263,7 @@ what you want to do, you shouldn't need to alter this method.
 
 * resolve_children ( %ARGS )
 
+
     use Data::Dumper;
 
     my $children = $ucs->resolve_children(dn => 'sys');
@@ -272,6 +284,8 @@ Unless you have read the UCS XML API Guide and are certain that you know
 what you want to do, you shouldn't need to alter this method.
 
 * resolve_class_filter ( %ARGS )
+
+
     my $associated_servers = $ucs->resolve_class_filter(    classId         => 'computeBlade',
                                                             association     => 'associatied'        );
 
@@ -290,6 +304,7 @@ addition to the classId parameter.
 
 * get_cluster_status ()
 
+
     my $status = $ucs->get_cluster_status;
 
 This method returns an anonymous hash representing a brief overall
@@ -299,12 +314,14 @@ managed entity.
 
 * version ()
 
+
     my $version = $ucs->version;
 
 This method returns a string containign the running UCSM software
 version.
 
 * mgmt_entity ( $id )
+
 
     print "HA status : " . $ucs->mgmt_entity(A)->ha_readiness . "\n";
     
@@ -323,6 +340,7 @@ Please see the Caching Methods section in NOTES for further information.
 
 * get_mgmt_entity ( $id )
 
+
     print "Management services state : " . $ucs->get_mgmt_entity(A)->mgmt_services_state . "\n";
 
 Returns a Cisco::UCS::MgmtEntity object for the specified management
@@ -335,6 +353,7 @@ the equivalent caching method *get_mgmt_entity*.
 Please see the Caching Methods section in NOTES for further information.
 
 * get_mgmt_entities ()
+
  
     my @mgmt_entities = $ucs->get_mgmt_entities;
 
@@ -347,6 +366,7 @@ management entities in the cluster (usually two - 'A' and 'B').
 
 * get_primary_mgmt_entity ()
 
+
     my $primary = $ucs->get_primary_mgmt_entity;
     print "Management entity $entity->{id} is primary\n";
 
@@ -355,6 +375,7 @@ management entity object. This is the active managing instance of UCSM
 in the target cluster.
 
 * get_subordinate_mgmt_entity ()
+
 
     print 'Management entity ', $ucs->get_subordinate_mgmt_entity->{id}, ' is the subordinate management entity in cluster ',$ucs->{cluster},"\n";
 
@@ -386,6 +407,7 @@ Please see the Caching Methods section in NOTES for further information.
 
 * get_service_profiles ()
 
+
     my @service_profiles = $ucs->get_service_profiles;
 
     foreach my $service_profile (@service_profiles) {
@@ -398,6 +420,7 @@ Returns an array of Cisco::UCS::ServiceProfile objects representing all
 service profiles currently present on the target UCS cluster.
 
 * interconnect ( $ID )
+
 
     my $serial = $ucs->interconnect(A)->serial;
 
@@ -412,6 +435,7 @@ available. Please see the Caching Methods section in NOTES for further
 information.
 
 * get_interconnect ( $ID )
+
 
     my $interconnect = $ucs->get_interconnect(A);
 
@@ -428,6 +452,7 @@ Please see the Caching Methods section in NOTES for further information.
 
 * get_interconnects ()
 
+
     my @interconnects = $ucs->get_interconnects;
 
     foreach my $ic (@interconnects) {
@@ -438,6 +463,7 @@ Returns an array of Cisco::UCS::Interconnect objects. This is a
 non-caching method.
 
 * blade ( $ID )
+
 
     print "Blade 1/1 serial : " . $ucs->blade('1/1')->serial .. "\n;
 
@@ -458,6 +484,7 @@ Please see the Caching Methods section in NOTES for further information.
 
 * get_blade ( $ID )
 
+
     print "Blade 1/1 serial : " . $ucs->get_blade('1/1')->serial .. "\n;
 
 Returns a Cisco::UCS::Blade object representing the specified blade as
@@ -473,6 +500,7 @@ caching blade method described above.
 
 * get_blades ()
 
+
     my @blades = $ucs->get_blades();
 
     foreach my $blade (@blades) {
@@ -484,6 +512,7 @@ representing a blade within the UCS cluster.
 
 * chassis ( $ID )
 
+    
     my $chassis = $ucs->chassis(1);
     print "Chassis 1 serial : " . $chassis->serial . "\n";
     # or
@@ -505,7 +534,7 @@ method below.
 Please see the Caching Methods section in NOTES for further information.
 
 * get_chassis ( $ID )
-
+    
     my $chassis = $ucs->get_chassis(1);
     print "Chassis 1 label : " . $chassis->label . "\n";
     # or
@@ -519,6 +548,7 @@ information. Consequently may be more expensive than the equivalent
 caching chassis method described above.
 
 * get_chassiss
+    
 
     my @chassis = $ucs->get_chassiss();
 
@@ -538,43 +568,43 @@ This method generates a new "full state" type backup for the target UCS
 cluster. Internally, this method is implemented as a wrapper method
 around the private backup method. Required parameters for this method:
 
-** backup_proto
+    * backup_proto
 The protocol to use for transferring the backup from the target UCS
 cluster to the backup host. Must be one of: ftp, tftp, scp or sftp.
 
-** backup_host
+    * backup_host
 The host to which the backup will be transferred.
 
-** backup_target
+    * backup_target
 The fully qualified name of the file to which the backup is to be
 saved on the backup host. This should include the full directory path
 and the target filename.
 
-** backup_username
+    * backup_username
 The username to be used for creation of the backup file on the backup
 host. This username should have write/modify file system access to
 the backup target location on the backup host using the protocol
 specified in the backup-proto attribute.
 
-** backup_passwd
+    * backup_passwd
 The plaintext password of the user specified for the backup_username
 attribute.
 
-** all_config_backup
+    * all_config_backup
 This method generates a new "all configuration" backup for the target
 UCS cluster. Internally, this method is implemented as a wrapper method
 around the private backup method. For the required parameters for this
 method, please refer to the documentation of the full_state_backup
 method.
 
-** system_config_backup
+    * system_config_backup
 This method generates a new "system configuration" backup for the target
 UCS cluster. Internally, this method is implemented as a wrapper method
 around the private backup method. For the required parameters for this
 method, please refer to the documentation of the full_state_backup
 method.
 
-** logical_config_backup
+    * logical_config_backup
 This method generates a new "logical configuration" backup for the
 target UCS cluster. Internally, this method is implemented as a wrapper
 method around the private backup method. For the required parameters for
