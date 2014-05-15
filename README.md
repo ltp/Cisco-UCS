@@ -263,11 +263,10 @@ what you want to do, you shouldn't need to alter this method.
 
 * resolve_children ( %ARGS )
 
+        use Data::Dumper;
 
-    use Data::Dumper;
-
-    my $children = $ucs->resolve_children(dn => 'sys');
-    print Dumper($children);
+        my $children = $ucs->resolve_children(dn => 'sys');
+        print Dumper($children);
 
 This method is used to resolve all child objects for a given
 distinguished named (dn) object in the UCSM management heirachy. This
@@ -286,8 +285,8 @@ what you want to do, you shouldn't need to alter this method.
 * resolve_class_filter ( %ARGS )
 
 
-    my $associated_servers = $ucs->resolve_class_filter(    classId         => 'computeBlade',
-                                                            association     => 'associatied'        );
+        my $associated_servers = $ucs->resolve_class_filter(    classId         => 'computeBlade',
+                                                                association     => 'associatied'        );
 
 This method is used to retrieve objects from the UCSM management
 heirachy by resolving the classId for specific object types matching a
@@ -305,7 +304,7 @@ addition to the classId parameter.
 * get_cluster_status ()
 
 
-    my $status = $ucs->get_cluster_status;
+        my $status = $ucs->get_cluster_status;
 
 This method returns an anonymous hash representing a brief overall
 cluster status. In the standard configuration of a HA pair of Fabric
@@ -315,7 +314,7 @@ managed entity.
 * version ()
 
 
-    my $version = $ucs->version;
+        my $version = $ucs->version;
 
 This method returns a string containign the running UCSM software
 version.
@@ -323,10 +322,10 @@ version.
 * mgmt_entity ( $id )
 
 
-    print "HA status : " . $ucs->mgmt_entity(A)->ha_readiness . "\n";
-    
-    my $mgmt_entity = $ucs->mgmt_entity('B');
-    print $mgmt_entity->leadership;
+        print "HA status : " . $ucs->mgmt_entity(A)->ha_readiness . "\n";
+        
+        my $mgmt_entity = $ucs->mgmt_entity('B');
+        print $mgmt_entity->leadership;
 
 Returns a Cisco::UCS::MgmtEntity object for the specified management
 instance (either 'A' or 'B').
@@ -341,7 +340,7 @@ Please see the Caching Methods section in NOTES for further information.
 * get_mgmt_entity ( $id )
 
 
-    print "Management services state : " . $ucs->get_mgmt_entity(A)->mgmt_services_state . "\n";
+        print "Management services state : " . $ucs->get_mgmt_entity(A)->mgmt_services_state . "\n";
 
 Returns a Cisco::UCS::MgmtEntity object for the specified management
 instance (either 'A' or 'B').
@@ -355,11 +354,11 @@ Please see the Caching Methods section in NOTES for further information.
 * get_mgmt_entities ()
 
  
-    my @mgmt_entities = $ucs->get_mgmt_entities;
+        my @mgmt_entities = $ucs->get_mgmt_entities;
 
-    foreach $entity (@mgmt_entities) {
-        print "Management entity " . $entity->id . " is the " . $entity->leadership . " entity\n";
-    }
+        foreach $entity (@mgmt_entities) {
+            print "Management entity " . $entity->id . " is the " . $entity->leadership . " entity\n";
+        }
 
 Returns an array of Cisco::UCS::MgmtEntity objects representing all
 management entities in the cluster (usually two - 'A' and 'B').
@@ -367,8 +366,8 @@ management entities in the cluster (usually two - 'A' and 'B').
 * get_primary_mgmt_entity ()
 
 
-    my $primary = $ucs->get_primary_mgmt_entity;
-    print "Management entity $entity->{id} is primary\n";
+        my $primary = $ucs->get_primary_mgmt_entity;
+        print "Management entity $entity->{id} is primary\n";
 
 Returns an anonymous hash containing information on the primary UCSM
 management entity object. This is the active managing instance of UCSM
@@ -377,7 +376,8 @@ in the target cluster.
 * get_subordinate_mgmt_entity ()
 
 
-    print 'Management entity ', $ucs->get_subordinate_mgmt_entity->{id}, ' is the subordinate management entity in cluster ',$ucs->{cluster},"\n";
+        print 'Management entity ', $ucs->get_subordinate_mgmt_entity->{id}, 
+            ' is the subordinate management entity in cluster ',$ucs->{cluster},"\n";
 
 Returns an anonymous hash containing information on the subordinate UCSM
 management entity object.
@@ -408,23 +408,23 @@ Please see the Caching Methods section in NOTES for further information.
 * get_service_profiles ()
 
 
-    my @service_profiles = $ucs->get_service_profiles;
-
-    foreach my $service_profile (@service_profiles) {
-        print "Service Profile: " . $service_profile->name 
-        . " associated to blade: " . $service_profile->pnDn 
-        . "\n";
-    }
-
+        my @service_profiles = $ucs->get_service_profiles;
+    
+        foreach my $service_profile (@service_profiles) {
+            print "Service Profile: " . $service_profile->name 
+            . " associated to blade: " . $service_profile->pnDn 
+            . "\n";
+        }
+    
 Returns an array of Cisco::UCS::ServiceProfile objects representing all
 service profiles currently present on the target UCS cluster.
 
 * interconnect ( $ID )
 
 
-    my $serial = $ucs->interconnect(A)->serial;
-
-    print "Interconnect $_ serial: " . $ucs->interconnect($_) . "\n" for qw(A B);
+        my $serial = $ucs->interconnect(A)->serial;
+    
+        print "Interconnect $_ serial: " . $ucs->interconnect($_) . "\n" for qw(A B);
 
 Returns a Cisco::UCS::Interconnect object for the specified interconnect
 ID (either A or B).
@@ -437,9 +437,9 @@ information.
 * get_interconnect ( $ID )
 
 
-    my $interconnect = $ucs->get_interconnect(A);
+        my $interconnect = $ucs->get_interconnect(A);
 
-    print $interconnect->model;
+        print $interconnect->model;
 
 Returns a Cisco::UCS::Interconnect object for the specified interconnect
 ID (either A or B).
@@ -453,11 +453,11 @@ Please see the Caching Methods section in NOTES for further information.
 * get_interconnects ()
 
 
-    my @interconnects = $ucs->get_interconnects;
-
-    foreach my $ic (@interconnects) {
-        print "Interconnect $ic->id operability is $ic->operability\n";
-    }
+        my @interconnects = $ucs->get_interconnects;
+    
+        foreach my $ic (@interconnects) {
+            print "Interconnect $ic->id operability is $ic->operability\n";
+        }
 
 Returns an array of Cisco::UCS::Interconnect objects. This is a
 non-caching method.
@@ -465,7 +465,7 @@ non-caching method.
 * blade ( $ID )
 
 
-    print "Blade 1/1 serial : " . $ucs->blade('1/1')->serial .. "\n;
+        print "Blade 1/1 serial : " . $ucs->blade('1/1')->serial .. "\n;
 
 Returns a Cisco::UCS::Blade object representing the specified blade as
 given by the value of $ID. The blade ID should be given using the
@@ -485,7 +485,7 @@ Please see the Caching Methods section in NOTES for further information.
 * get_blade ( $ID )
 
 
-    print "Blade 1/1 serial : " . $ucs->get_blade('1/1')->serial .. "\n;
+         print "Blade 1/1 serial : " . $ucs->get_blade('1/1')->serial .. "\n;
 
 Returns a Cisco::UCS::Blade object representing the specified blade as
 given by the value of $ID. The blade ID should be given using the
@@ -501,11 +501,11 @@ caching blade method described above.
 * get_blades ()
 
 
-    my @blades = $ucs->get_blades();
-
-    foreach my $blade (@blades) {
-        print "Model: $blade->{model}\n";
-    }
+        my @blades = $ucs->get_blades();
+    
+        foreach my $blade (@blades) {
+            print "Model: $blade->{model}\n";
+        }
 
 Returns an array of Cisco::UCS::Blade objects with each object
 representing a blade within the UCS cluster.
@@ -513,14 +513,14 @@ representing a blade within the UCS cluster.
 * chassis ( $ID )
 
     
-    my $chassis = $ucs->chassis(1);
-    print "Chassis 1 serial : " . $chassis->serial . "\n";
-    # or
-    print "Chassis 1 serial : " . $ucs->chassis(1)->serial . "\n";
-
-    foreach my $psu ( $ucs->chassis(1)->get_psus ) {
-        print $psu->id . " thermal : " . $psu->thermal . "\n"
-    }
+        my $chassis = $ucs->chassis(1);
+        print "Chassis 1 serial : " . $chassis->serial . "\n";
+        # or
+        print "Chassis 1 serial : " . $ucs->chassis(1)->serial . "\n";
+    
+        foreach my $psu ( $ucs->chassis(1)->get_psus ) {
+            print $psu->id . " thermal : " . $psu->thermal . "\n"
+        }
 
 Returns a Cisco::UCS::Chassis object representing the chassis identified
 by by the specified value of ID.
@@ -535,10 +535,10 @@ Please see the Caching Methods section in NOTES for further information.
 
 * get_chassis ( $ID )
     
-    my $chassis = $ucs->get_chassis(1);
-    print "Chassis 1 label : " . $chassis->label . "\n";
-    # or
-    print "Chassis 1 label : " . $ucs->get_chassis(1)->label . "\n";
+        my $chassis = $ucs->get_chassis(1);
+        print "Chassis 1 label : " . $chassis->label . "\n";
+        # or
+        print "Chassis 1 label : " . $ucs->get_chassis(1)->label . "\n";
 
 Returns a Cisco::UCS::Chassis object representing the chassis identified
 by by the specified value of ID.
@@ -550,11 +550,11 @@ caching chassis method described above.
 * get_chassiss
     
 
-    my @chassis = $ucs->get_chassiss();
-
-    foreach my $chassis (@chassis) {
-        print "Chassis $chassis->{id} serial number: $chassis->{serial}\n";
-    }
+        my @chassis = $ucs->get_chassiss();
+    
+        foreach my $chassis (@chassis) {
+            print "Chassis $chassis->{id} serial number: $chassis->{serial}\n";
+        }
 
 Returns an array of Cisco::UCS::Chassis objects representing all chassis
 present within the cluster.
