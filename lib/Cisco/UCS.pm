@@ -16,7 +16,7 @@ use Carp qw(croak carp cluck);
 
 use vars qw($VERSION);
 
-our $VERSION		= '0.33';
+our $VERSION		= '0.34';
 
 our @ATTRIBUTES		= qw(dn cluster cookie);
 

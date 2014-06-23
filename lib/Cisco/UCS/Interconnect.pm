@@ -6,6 +6,7 @@ use strict;
 use Cisco::UCS::Common::SwitchCard;
 use Cisco::UCS::Common::PSU;
 use Cisco::UCS::Common::Fan;
+use Cisco::UCS::Interconnect::Stats;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
@@ -31,6 +32,10 @@ my %MMAP	= (
 				   },
 			psu	=> {
 					type	=> 'equipmentPsu',
+					class	=> 'Cisco::UCS::Common::PSU'
+				   },
+			psu	=> {
+					type	=> 'swSystemStats',
 					class	=> 'Cisco::UCS::Common::PSU'
 				   }
 		);
@@ -66,6 +71,13 @@ sub new {
 		*{ __PACKAGE__ .'::'. $gms	} = sub { my( $self, $id ) = @_; return $self->{ucs}->_get_child_objects( id => $id, type => $MMAP{$m}{type}, class => $MMAP{$m}{class}, attr => $m, self => $self ) };
 	}
 }
+
+sub stats {
+        my $self = shift;
+        #return $self->{ucs}->resolve_dn( dn => "$self->{dn}/sysstats" )->{outConfig}->{swSystemStats};
+        return Cisco::UCS::Interconnect::Stats->new( $self->{ucs}->resolve_dn( dn => "$self->{dn}/sysstats" ) )
+}
+
 
 =head1 NAME
 
