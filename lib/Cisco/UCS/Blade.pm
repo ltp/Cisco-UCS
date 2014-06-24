@@ -5,6 +5,7 @@ use strict;
 
 use Carp 		qw(croak);
 use Scalar::Util 	qw(weaken);
+use Cisco::UCS::Blade::Adaptor;
 use Cisco::UCS::Blade::CPU;
 use Cisco::UCS::Blade::PowerBudget;
 use Cisco::UCS::Common::PowerStats;
@@ -132,6 +133,33 @@ sub get_cpus {
 	}
 
 	return @cpus;
+}
+
+sub adaptor {
+	my ( $self, $id ) = @_;
+	return ( defined $self->{adaptor}->{$id} ? $self->{adaptor}->{$id} : $self->get_adaptors( $id ) )
+}
+
+sub get_adaptor {
+	my ( $self, $id ) = @_;
+	return ( $id ? $self->get_adaptors( $id ) : undef )
+}
+
+
+sub get_adaptors {
+	my ( $self, $id ) = @_;	
+	my $adaptors = $self->{ucs}->resolve_children( dn => "$self->{dn}" )->{outConfigs}->{adaptorUnit};
+	my @adaptors;
+
+	while ( my ( $aid, $adaptor ) = each %$adaptors ) {
+		$adaptor->{id} = $aid;
+		$adaptor = Cisco::UCS::Blade::Adaptor->new( $self->{ucs}, $adaptor );
+		push @adaptors, $adaptor;
+		$self->{adaptor}->{$aid} = $adaptor;
+		return $adaptor if ( defined $id and $aid == $id )
+	}
+
+	return @adaptors;
 }
 
 1;
