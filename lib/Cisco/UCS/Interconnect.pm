@@ -34,10 +34,6 @@ my %MMAP	= (
 					type	=> 'equipmentPsu',
 					class	=> 'Cisco::UCS::Common::PSU'
 				   },
-			psu	=> {
-					type	=> 'swSystemStats',
-					class	=> 'Cisco::UCS::Common::PSU'
-				   }
 		);
 
 sub new {
@@ -74,10 +70,13 @@ sub new {
 
 sub stats {
         my $self = shift;
-        #return $self->{ucs}->resolve_dn( dn => "$self->{dn}/sysstats" )->{outConfig}->{swSystemStats};
         return Cisco::UCS::Interconnect::Stats->new( $self->{ucs}->resolve_dn( dn => "$self->{dn}/sysstats" ) )
 }
 
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -331,5 +330,3 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
-
-1;
