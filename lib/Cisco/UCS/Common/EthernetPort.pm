@@ -8,7 +8,7 @@ use Scalar::Util qw(weaken);
 
 our $VERSION = '0.1';
 
-our @ATTRIBUTES = qw(id dn epDn mac mode type);
+our @ATTRIBUTES = qw( dn epDn mac mode type);
 
 our %ATTRIBUTES = (
 		admin_state			=> 'adminState',
@@ -22,7 +22,8 @@ our %ATTRIBUTES = (
 		peer_dn				=> 'peerDn',
 		peer_port_id			=> 'peerPortId',
 		rcvr_type			=> 'xcvrType',
-		switch_id			=> 'switchId'
+		switch_id			=> 'switchId',
+		id				=> 'portId'
 );
 
 our %STATS = (
