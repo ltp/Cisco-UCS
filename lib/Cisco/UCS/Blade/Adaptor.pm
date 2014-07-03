@@ -56,6 +56,12 @@ sub new {
         return $self
 }
 
+sub env_stats {
+        my $self = shift;
+        return Cisco::UCS::Common::EnvironmentalStats->new(
+                $self->{ucs}->resolve_dn( dn => "$self->{dn}/env-stats" )->{outConfig}->{processorEnvStats} )
+}
+
 1;
 
 =head1 NAME
