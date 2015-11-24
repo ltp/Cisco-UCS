@@ -22,150 +22,6 @@ our @ATTRIBUTES		= qw(dn cluster cookie);
 
 our %ATTRIBUTES		= ();
 
-=head1 NAME
-
-Cisco::UCS - A Perl interface to the Cisco UCS XML API
-
-=head1 SYNOPSIS
-
-	use Cisco::UCS;
-
-	my $ucs = Cisco::UCS->new (
-				cluster		=> $cluster, 
-				username	=> $username,
-				passwd		=> $password
-				);
-
-	$ucs->login();
-
-	@errors = $ucs->get_errors(severity=>"critical",ack="no");
-
-	foreach my $error_id (@errors) {
-		my %this_error = $ucs->get_error_id($error_id);
-		print "Error ID: $error_id.  Severity: $this_error{severity}.  Description: $this_error{descr}\n";
-	}
-
-	print "Interconnect A serial : " . $ucs->interconnect(A)->serial . "\n";
-
-	# prints "Interconnect A serial : BFG9000"
-
-	foreach my $chassis ($ucs->chassis) {
-		print "Chassis " . $chassis->id . " serial : " . $chassis->serial . "\n"
-	}
-
-	# prints:
-	# "Chassis 1 serial : ABC1234"
-	# "Chassis 2 serial : ABC1235"
-	# etc.
-
-	print "Interconnect A Ethernet 1/1 TX bytes: " . $ucs->interconnect(A)->card(1)->eth_port(1)->tx_total_bytes . "\n";
-
-	# prints "Interconnect A Ethernet 1/1 TX bytes: 83462486"
-
-	$ucs->logout();
-
-=head1 DESCRIPTION
-
-This package provides an abstracted interface to the Cisco UCS Manager XML API and Cisco UCS Management Information Model.
-
-The Cisco UCS Manager (UCSM) is an embedded software agent providing access to the hardware and configuration management 
-features of attached Cisco UCS hardware.  The Management Information Model for the UCSM is organised into a structured 
-heirachy of both physical and virtual objects.  Accessing objects within the heirachy is done through a number of high
-level calls to heirachy search and traversal methods.
-
-The primary aim of this package is to provide a simplified and abstract interface to this management heirachy.
-
-=head2 METHODS
-
-=head3 new ( CLUSTER, PORT, PROTO, USERNAME, PASSWORD )
-
-	my $ucs = Cisco::UCS->new ( 	cluster		=> $cluster, 
-					port		=> $port,
-					proto		=> $proto,
-					username	=> $username,
-					passwd		=> $passwd
-				);
-
-Constructor method.  Creates a new Cisco::UCS object representing a connection to the Cisco UCSM XML API.  
-
-Parameters are:
-
-=over 3
-
-=item cluster
-
-The common name of the target cluster.  This name should be resolvable on the host from which the script is run.
-
-=item username
-
-The username to use for the connection.  This username needs to have the correct RBAC role for the operations that
-one intends to perform.
-
-=item passwd
-
-The plaintext password of the username specified for the B<username> attribute for the connection.
-
-=item port
-
-The port on which to connect to the UCSM XML API on the target cluster.  This parameter is optional and will default
-to 443 if not provided.
-
-=item proto
-
-The protocol with which to connect to the UCSM XML API on the target cluster.  This value is optional hould be
-one of 'http' or 'https' and will default to 'https' if not provided.
-
-=back
-
-=head3 login ()
-
-	$ucs->login;
-	print "Authentication token is $ucs->cookie\n";
-
-Creates a connection to the XML API interface of a USCM management instance.  If sucessful, the attributes of the 
-UCSM management instance are inherited by the object.  Most important of these parameters is 'cookie' representing the 
-authetication token that uniquely identifies the connection and which is subsequently passed transparently on all 
-further communications.
-
-The default time-out value for a token is 10 minutes, therefore if you intend to create a long-running session you
-should periodically call refresh.
-
-=head3 refresh ()
-
-	$ucs->refresh;
-
-Resets the expiry time limit of the existing authentication token to the default timeout period of 10m.  Usually not necessary
-for short-lived connections.
-
-=head3 logout ()
-
-	$ucs->logout;
-
-Expires the current authentication token.  This method should always be called on completion of a script to expire the authentication
-token and free the current session for use by others.  The UCS XML API has a maximum number of available connections, and a maximum 
-number of sessions per user.  In order to ensure that the session remain available (especially if using common credentials), you should 
-always call this method on completion of a script, as an argument to die, or in any eval where a script may fail and exit before logging out;
-
-=head3 cookie ()
-
-	print $ucs->cookie;
-
-Returns the value of the authentication token.
-
-=head3 cluster ()
-
-	print $ucs->cluster;
-
-Returns the value of cluster as given in the constructor.
-
-=head3 dn ()
-
-	print $ucs->dn;
-
-Returns the distinguished name that specifies the base scope of the Cisco::UCS object.
-
-=cut
-
 sub new {
         my ($class, %args) = @_;
 	my $self = {};
@@ -378,70 +234,20 @@ sub _get_child_objects {
     
 }
 
-=head3 get_error_id ( $ID )
-
-	my %error = $ucs->get_error_id($id);
-
-	while (my($key,$value) = each %error) {
-		print "$key:\t$value\n";
-	}
-	
-B<This method is deprecated, please use the equivalent get_error method>.
-
-Returns a hash containing the UCSM event detail for the given error id.  This method takes a single argument;
-the UCSM error_id of the desired error.
-
-=cut
-
 sub get_error_id {
 	warn "get_error_id has been deprecated in future releases";
 	return get_error(@_)
 }
-
-=head3 error ( $id )
-
-	my $error = $ucs->get_error($id);
-	print $error->id . ":" . $error->desc . "\n";
-
-Returns a Cisco::UCS::Fault object representing the specified error.  Note that this is a caching method
-and will return a cached object that has been retrieved on previous queries should on be available.
-
-If you require a fresh object, consider using the equivalent non-caching B<get_error> method below.
-
-=cut
 
 sub error {
 	my ($self, $id) = @_;
 	return ( defined $self->{fault}->{$id} ? $self->{fault}->{$id} : $self->get_error($id) )
 }
 
-=head2 get_error ( $ID )
-
-Returns a Cisco::UCS::Fault object representing the specified error.  Note that this is a non-caching
-method and that the UCSM will always be queried for information.  Consequently this method may be
-more expensive than the equivalent caching method B<error> described above.
-
-=cut
-
 sub get_error {
 	my ($self, $id)=@_;
 	return $self->get_errors($id)
 }
-
-=head3 get_errors ()
-
-	map {
-		print '-'x50,"\n";
-		print "ID		: " . $_->id . "\n";
-		print "Severity		: " . $_->severity . "\n";
-		print "Description	: " . $_->description . "\n";
-	} grep {
-		$_->severity !~ /cleared/i;
-	} $ucs->get_errors;
-
-Returns an array of Cisco::UCS::Fault objects with each object representative of a fault on the target system.
-
-=cut
 
 sub get_errors {
 	my ($self, $id)	=@_;
@@ -479,18 +285,6 @@ sub _createFilter {
 	return $filter;
 }
 
-=head3 resolve_class ( %ARGS )
-
-This method is used to retrieve objects from the UCSM management heirachy by resolving the classId for specific
-object types.  This method reflects one of the base methods provided by the UCS XML API for resolution of objects.
-The method returns an XML::Simple parsed object from the UCSM containing the response.
-
-This method accepts a hash containing the value of the classID to be resolved and 
-Unless you have read the UCS XML API Guide and are certain that you know what you want to do, you shouldn't need
-to alter this method.
-
-=cut
-
 sub resolve_class {
 	my ($self,%args)= @_;
 
@@ -506,17 +300,6 @@ sub resolve_class {
 
 	return $xml
 }	
-
-=head3 resolve_classes ( %ARGS )
-
-This method is used to retrieve objects from the UCSM management heirachy by resolving several classIds for specific
-object types.  This method reflects one of the base methods provided by the UCS XML API for resolution of objects.
-The method returns an XML::Simple object from the UCSM containing the parsed response.
-
-Unless you have read the UCS XML API Guide and are certain that you know what you want to do, you shouldn't need
-to alter this method.
-
-=cut
 
 sub resolve_classes {
 	my ($self,%args)= @_;
@@ -537,29 +320,6 @@ sub resolve_classes {
 	return $xml
 }	
 
-=head3 resolve_dn ( %ARGS )
-
-	my $blade = $ucs->resolve_dn( dn => 'sys/chassis-1/blade-2');
-
-This method is used to retrieve objects from the UCSM management heirachy by resolving a specific distinguished name (dn)
-for a managed object.  This method reflects one of the base methods provided by the UCS XML API for resolution of objects.
-The method returns an XML::Simple parsed object from the UCSM containing the response.
-
-The method accepts a single key/value pair, with the value being the distinguished name of the object.  If not known, the dn 
-can be usually be retrieved by first using one of the other methods to retrieve a list of all object types (i.e. get_blades)
-and then enumerating the results to extract the dn from the desired object.
-
-	my @blades = $ucs->get_blades;
-
-	foreach my $blade in (@blades) {
-		print "Dn is $blade->{dn}\n";
-	}
-
-Unless you have read the UCS XML API Guide and are certain that you know what you want to do, you shouldn't need
-to alter this method.
-
-=cut
-
 sub resolve_dn {
 	my ($self,%args)= @_;
 
@@ -576,26 +336,6 @@ sub resolve_dn {
 				) or return;
 	return $xml;
 }
-
-=head3 resolve_children ( %ARGS )
-
-	use Data::Dumper;
-
-	my $children = $ucs->resolve_children(dn => 'sys');
-	print Dumper($children);
-
-This method is used to resolve all child objects for a given distinguished named (dn) object in the UCSM management 
-heirachy.  This method reflects one of the base methods provided by the UCS XML API for resolution of objects.
-The method returns an XML::Simple parsed object from the UCSM containing the response.
-
-In combination with Data::Dumper this is an extremely useful method for further development by enumerating the child
-objects of the specified dn.  Note however, that the response returned from UCSM may not always accurately reflect
-all elements due to folding.
-
-Unless you have read the UCS XML API Guide and are certain that you know what you want to do, you shouldn't need
-to alter this method.
-
-=cut
 
 sub resolve_children {
 	my ($self,%args)= @_;
@@ -616,22 +356,6 @@ sub resolve_children {
 	return $xml
 }	
 
-=head3 resolve_class_filter ( %ARGS )
-
-	my $associated_servers = $ucs->resolve_class_filter(	classId		=> 'computeBlade',
-								association	=> 'associatied' 	);
-
-This method is used to retrieve objects from the UCSM management heirachy by resolving the classId for specific
-object types matching a specified filter composed of any number of key/value pairs that correlate to object attributes.
-
-This method is very similar to the <B>resolve_class method, however a filter can be specified to restrict the objects
-returned to those having certain characteristics.  This method is largely exploited by subclasses to return specific
-object types.
-
-The filter is to be specified as any number of name/value pairs in addition to the classId parameter.
-
-=cut
-
 sub resolve_class_filter {
 	my($self,%args)	= @_;
 	
@@ -645,15 +369,6 @@ sub resolve_class_filter {
 	return $xml
 }
 
-=head3 get_cluster_status ()
-
-	my $status = $ucs->get_cluster_status;
-
-This method returns an anonymous hash representing a brief overall cluster status.  In the standard configuration
-of a HA pair of Fabric Interconnects, this status is representative of the cluster as a single managed entity.
-
-=cut
-
 sub get_cluster_status {
 	my $self= shift;
 
@@ -662,89 +377,26 @@ sub get_cluster_status {
 	return (defined $xml->{outConfig}->{topSystem} ? $xml->{outConfig}->{topSystem} : undef)
 }
 
-=head3 version ()
-
-	my $version = $ucs->version;
-
-This method returns a string containign the running UCSM software version.
-
-=cut
-
 sub version {
 	my $self= shift;
 	my $xml	= $self->resolve_dn(dn => 'sys/mgmt/fw-system') or return;
 	return (defined $xml->{outConfig}->{firmwareRunning}->{version} ? $xml->{outConfig}->{firmwareRunning}->{version} : undef)
 }
 
-
-=head3 mgmt_entity ( $id )
-
-	print "HA status : " . $ucs->mgmt_entity(A)->ha_readiness . "\n";
-	
-	my $mgmt_entity = $ucs->mgmt_entity('B');
-	print $mgmt_entity->leadership;
-
-Returns a Cisco::UCS::MgmtEntity object for the specified management instance (either 'A' or 'B').
-
-This is a caching method and will return a cached copy of a previously retrieved Cisco::UCS::MgmtEntity object
-should one be available. i If you require a fresh copy of the object then consider using the B<get_mgmt_entity>
-method below.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
-
 sub mgmt_entity {
 	my ($self, $id) = @_;
 	return ( defined $self->{mgmt_entity}->{$id} ? $self->{mgmt_entity}->{$id} : $self->mgmt_entity($id) )
 }
-
-=head3 get_mgmt_entity ( $id )
-
-	print "Management services state : " . $ucs->get_mgmt_entity(A)->mgmt_services_state . "\n";
-	
-Returns a Cisco::UCS::MgmtEntity object for the specified management instance (either 'A' or 'B').
-
-This method always queries the UCSM for information on the specified management entity - consequently 
-this method may be more expensive that the equivalent caching method I<get_mgmt_entity>.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
 
 sub get_mgmt_entity {
 	my ($self, $id)	= @_;
 	return $self->get_mgmt_entities($id)
 }
 
-=head3 get_mgmt_entities ()
-
-	my @mgmt_entities = $ucs->get_mgmt_entities;
-
-	foreach $entity (@mgmt_entities) {
-		print "Management entity " . $entity->id . " is the " . $entity->leadership . " entity\n";
-	}
-
-Returns an array of Cisco::UCS::MgmtEntity objects representing all management entities in the cluster (usually two - 'A' and 'B').
-
-=cut
-
 sub get_mgmt_entities {
         my ($self, $id) = @_;
 	return $self->_get_child_objects(id => $id, type => 'mgmtEntity', class => 'Cisco::UCS::MgmtEntity', attr => 'mgmt_entity');
 }
-
-
-=head3 get_primary_mgmt_entity ()
-
-	my $primary = $ucs->get_primary_mgmt_entity;
-	print "Management entity $entity->{id} is primary\n";
-
-Returns an anonymous hash containing information on the primary UCSM management entity object.  
-This is the active managing instance of UCSM in the target cluster.
-
-=cut
-
 
 sub get_primary_mgmt_entity {
 	my $self	= shift;
@@ -754,14 +406,6 @@ sub get_primary_mgmt_entity {
 	return (defined $xml->{outConfigs}->{mgmtEntity} ? $xml->{outConfigs}->{mgmtEntity} : undef)
 }
 
-=head3 get_subordinate_mgmt_entity ()
-
-	print 'Management entity ', $ucs->get_subordinate_mgmt_entity->{id}, ' is the subordinate management entity in cluster ',$ucs->{cluster},"\n";
-
-Returns an anonymous hash containing information on the subordinate UCSM management entity object.  
-
-=cut
-
 sub get_subordinate_mgmt_entity {
 	my $self= shift;
 
@@ -770,53 +414,15 @@ sub get_subordinate_mgmt_entity {
 	return (defined $xml->{outConfigs}->{mgmtEntity} ? $xml->{outConfigs}->{mgmtEntity} : undef);
 }
 
-=head3 service_profile ( $ID )
-
-Returns a Cisco::UCS::ServiceProfile object where $ID is the user-specified name of the service profile.
-
-This is a caching method and will return a cached copy of a previously retrieved Cisco::UCS::ServiceProfile object
-should one be available. i If you require a fresh copy of the object then consider using the B<get_service_profile>
-method below.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
-
 sub service_profile {
 	my ($self, $id)=@_;
 	return ( defined $self->{service_profile}->{$id} ? $self->{service_profile}->{$id} : $self->get_service_profile($id) )
 }
 
-=head3 get_service_profile ( $ID )
-
-Returns a Cisco::UCS::ServiceProfile object where $ID is the user-specified name of the service profile.
-
-This method always queries the UCSM for information on the specified service profile - consequently this
-method may be more expensive that the equivalent caching method I<service_profile>.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
-
 sub get_service_profile {
 	my ($self, $id)	= @_;
 	return $self->get_service_profiles($id)
 }
-
-=head3 get_service_profiles ()
-
-	my @service_profiles = $ucs->get_service_profiles;
-
-	foreach my $service_profile (@service_profiles) {
-		print "Service Profile: " . $service_profile->name .
-		      " associated to blade: " . $service_profile->pnDn . "\n";
-	}
-
-Returns an array of Cisco::UCS::ServiceProfile objects representing all service profiles
-currently present on the target UCS cluster.
-
-=cut
-
 
 sub get_service_profiles {
 	my ($self, $id)	=@_;
@@ -824,114 +430,30 @@ sub get_service_profiles {
 					uid => 'name', attr => 'service_profile', class_filter => { classId => 'lsServer' });
 }
 
-=head3 interconnect ( $ID )
-
-	my $serial = $ucs->interconnect(A)->serial;
-
-	print "Interconnect $_ serial: " . $ucs->interconnect($_) . "\n" for qw(A B);
-
-Returns a Cisco::UCS::Interconnect object for the specified interconnect ID (either A or B).
-
-Note that the default behaviour of this method is to return a cached copy of a previously retrieved 
-Cisco::UCS::Interconnect object if one is available.  Please see the B<Caching Methods> section in B<NOTES>
-for further information.
-
-=cut
-
 sub interconnect {
 	my ($self, $id)	= @_;
 	return ( defined $self->{interconnect}->{$id} ? $self->{interconnect}->{$id} : $self->get_interconnect($id) )
 }
-
-=head3 get_interconnect ( $ID )
-
-	my $interconnect = $ucs->get_interconnect(A);
-
-	print $interconnect->model;
-
-Returns a Cisco::UCS::Interconnect object for the specified interconnect ID (either A or B).
-
-This method always queries the UCSM for information on the specified interconnect - contrast this
-with the behaviour of the caching method I<interconnect()>.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
 
 sub get_interconnect {
 	my ($self, $id)=@_;
 	return $self->get_interconnects($id)
 }
 
-=head3 get_interconnects ()
-
-	my @interconnects = $ucs->get_interconnects;
-
-	foreach my $ic (@interconnects) {
-		print "Interconnect $ic->id operability is $ic->operability\n";
-	}
-
-Returns an array of Cisco::UCS::Interconnect objects.  This is a non-caching method.
-
-=cut
-
 sub get_interconnects {
 	my ($self, $id)	=@_;
 	return $self->_get_child_objects(id => $id, type => 'networkElement', class => 'Cisco::UCS::Interconnect', attr => 'interconnect');
 }
-
-=head3 blade ( $ID )
-
-	print "Blade 1/1 serial : " . $ucs->blade('1/1')->serial .. "\n;
-
-Returns a Cisco::UCS::Blade object representing the specified blade as given by the value of $ID.  The blade ID
-should be given using the standard Cisco UCS blade identification form as used in the UCSM CLI; namely 
-B<chassis_id/blade_id> where both chassis_id and blade_id are valid numerical values for the target cluster.
-Note that you will have to enclose the value of $ID in quotation marks to avoid a syntax error.
-
-Note that this is a caching method and the default behaviour of this method is to return a cached 
-copy of a previously retrieved Cisco::UCS::Blade object if one is available.  If a non-cached object is
-required, then please consider using the equivalent B<get_blade> method below.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
 
 sub blade {
 	my ($self, $id)	= @_;
 	return ( defined $self->{blade}->{$id} ? $self->{blade}->{$id} : $self->get_blade($id) )
 }
 
-=head3 get_blade ( $ID )
-
-	print "Blade 1/1 serial : " . $ucs->get_blade('1/1')->serial .. "\n;
-
-Returns a Cisco::UCS::Blade object representing the specified blade as given by the value of $ID.  The blade ID
-should be given using the standard Cisco UCS blade identification form as used in the UCSM CLI; namely 
-B<chassis_id/blade_id> where both chassis_id and blade_id are valid numerical values for the target cluster.
-Note that you will have to enclose the value of $ID in quotation marks to avoid a syntax error.
-
-Note that this method is non-caching and always queries the UCSM for information.  Consequently may be more 
-expensive than the equivalent caching B<blade> method described above.
-
-=cut
-
 sub get_blade {
 	my ($self, $id)=@_;
 	return $self->get_blades($id)
 }
-
-=head3 get_blades ()
-
-	my @blades = $ucs->get_blades();
-
-	foreach my $blade (@blades) {
-		print "Model: $blade->{model}\n";
-	}
-
-Returns an array of B<Cisco::UCS::Blade> objects with each object representing a blade within the UCS cluster.
-
-=cut
 
 sub get_blades {
 	my ($self, $id, %args)	=@_;
@@ -939,103 +461,20 @@ sub get_blades {
 					uid => 'serverId', class_filter => { classId => 'computeBlade' });
 }
 
-=head3 chassis ( $ID )
-
-	my $chassis = $ucs->chassis(1);
-	print "Chassis 1 serial : " . $chassis->serial . "\n";
-	# or
-	print "Chassis 1 serial : " . $ucs->chassis(1)->serial . "\n";
-
-	foreach my $psu ( $ucs->chassis(1)->get_psus ) {
-		print $psu->id . " thermal : " . $psu->thermal . "\n"
-	}
-
-Returns a Cisco::UCS::Chassis object representing the chassis identified by by the specified value of ID.
-
-Note that this is a caching method and the default behaviour of this method is to return a cached 
-copy of a previously retrieved Cisco::UCS::Chassis object if one is available.  If a non-cached object is
-required, then please consider using the equivalent B<get_chassis> method below.
-
-Please see the B<Caching Methods> section in B<NOTES> for further information.
-
-=cut
-
 sub chassis {
 	my ($self, $id)	= @_;
 	return ( defined $self->{chassis}->{$id} ? $self->{chassis}->{$id} : $self->get_chassis($id) )
 }
-
-=head3 get_chassis ( $ID )
-
-	my $chassis = $ucs->get_chassis(1);
-	print "Chassis 1 label : " . $chassis->label . "\n";
-	# or
-	print "Chassis 1 label : " . $ucs->get_chassis(1)->label . "\n";
-
-Returns a Cisco::UCS::Chassis object representing the chassis identified by by the specified value of ID.
-
-Note that this method is non-caching and always queries the UCSM for information.  Consequently may be more 
-expensive than the equivalent caching B<chassis> method described above.
-
-=cut
 
 sub get_chassis {
 	my ($self, $id)=@_;
 	return $self->get_chassiss($id)
 }
 
-=head3 get_chassiss
-	
-	my @chassis = $ucs->get_chassiss();
-
-	foreach my $chassis (@chassis) {
-		print "Chassis $chassis->{id} serial number: $chassis->{serial}\n";
-	}
-
-Returns an array of Cisco::UCS::Chassis objects representing all chassis present within the cluster.
-
-Note that this method is named get_chassiss (spelt with two sets of double-s's) as there exists no English language collective plural for
-the word chassis.
-
-=cut
-
 sub get_chassiss {
 	my ($self, $id)	=@_;
 	return $self->_get_child_objects(id => $id, type => 'equipmentChassis', class => 'Cisco::UCS::Chassis', attr => 'chassis');
 }
-
-=head3 full_state_backup
-
-This method generates a new "full state" type backup for the target UCS cluster.  Internally, this method is implemented as a 
-wrapper method around the private backup method.  Required parameters for this method:
-
-=over 3
-
-=item backup_proto 
-
-The protocol to use for transferring the backup from the target UCS cluster to the backup host.  Must be one of: ftp, tftp, scp or sftp.
-
-=item backup_host
-
-The host to which the backup will be transferred.
-
-=item backup_target
-
-The fully qualified name of the file to which the backup is to be saved on the backup host.  This should include the full directory
-path and the target filename.
-
-=item backup_username
-
-The username to be used for creation of the backup file on the backup host.  This username should have write/modify file system access to
-the backup target location on the backup host using the protocol specified in the backup-proto attribute.
-
-=item backup_passwd
-
-The plaintext password of the user specified for the backup_username attribute.
-
-=back
-
-=cut
 
 sub full_state_backup {
 	my ( $self, %args ) = @_;
@@ -1044,15 +483,6 @@ sub full_state_backup {
 
 	return ( $self->_backup( %args ) );
 }
-
-=head3 all_config_backup
-
-This method generates a new "all configuration" backup for the target UCS cluster.  Internally, this method is implemented as a
-wrapper method around the private backup method.  For the required parameters for this method, please refer to the documentation of
-the B<full_state_backup> method.
-
-=cut
-
 sub all_config_backup {
 	my ( $self, %args ) = @_;
 
@@ -1061,14 +491,6 @@ sub all_config_backup {
 	return ( $self->_backup( %args ) );
 }
 
-=head3 system_config_backup
-
-This method generates a new "system configuration" backup for the target UCS cluster.  Internally, this method is implemented as a
-wrapper method around the private backup method.  For the required parameters for this method, please refer to the documentation of
-the B<full_state_backup> method.
-
-=cut
-
 sub system_config_backup {
 	my ( $self, %args ) = @_;
 
@@ -1076,14 +498,6 @@ sub system_config_backup {
 
 	return ( $self->_backup( %args ) );
 }
-
-=head3 logical_config_backup
-
-This method generates a new "logical configuration" backup for the target UCS cluster.  Internally, this method is implemented as a
-wrapper method around the private backup method.  For the required parameters for this method, please refer to the documentation of
-the B<full_state_backup> method.
-
-=cut
 
 sub logical_config_backup {
 	my ( $self, %args ) = @_;
@@ -1151,17 +565,643 @@ XML
 	return 1;
 }
 
+1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Cisco::UCS - A Perl interface to the Cisco UCS XML API
+
+=head1 SYNOPSIS
+
+	use Cisco::UCS;
+
+	my $ucs = Cisco::UCS->new (
+				cluster		=> $cluster, 
+				username	=> $username,
+				passwd		=> $password
+				);
+
+	$ucs->login();
+
+	@errors = $ucs->get_errors(severity=>"critical",ack="no");
+
+	foreach my $error_id (@errors) {
+		my %this_error = $ucs->get_error_id($error_id);
+		print "Error ID: $error_id.  Severity: $this_error{severity}."
+			. "  Description: $this_error{descr}\n";
+	}
+
+	print "Interconnect A serial : " 
+		. $ucs->interconnect(A)->serial 
+		. "\n";
+
+	# prints "Interconnect A serial : BFG9000"
+
+	foreach my $chassis ($ucs->chassis) {
+		print "Chassis " . $chassis->id 
+			. " serial : " . $chassis->serial . "\n"
+	}
+
+	# prints:
+	# "Chassis 1 serial : ABC1234"
+	# "Chassis 2 serial : ABC1235"
+	# etc.
+
+	print "Interconnect A Ethernet 1/1 TX bytes: " 
+		. $ucs->interconnect(A)->card(1)->eth_port(1)->tx_total_bytes;
+
+	# prints "Interconnect A Ethernet 1/1 TX bytes: 83462486"
+
+	$ucs->logout();
+
+=head1 DESCRIPTION
+
+This package provides an abstracted interface to the Cisco UCS Manager XML API 
+and Cisco UCS Management Information Model.
+
+The Cisco UCS Manager (UCSM) is an embedded software agent providing access to 
+the hardware and configuration management features of attached Cisco UCS 
+hardware.  The Management Information Model for the UCSM is organised into a 
+structured heirachy of both physical and virtual objects.  Accessing objects 
+within the heirachy is done through a number of high level calls to heirachy 
+search and traversal methods.
+
+The primary aim of this package is to provide a simplified and abstract 
+interface to this management heirachy.
+
+=head2 METHODS
+
+=head3 new ( CLUSTER, PORT, PROTO, USERNAME, PASSWORD )
+
+	my $ucs = Cisco::UCS->new ( 	
+				cluster  => $cluster, 
+				port     => $port,
+				proto    => $proto,
+				username => $username,
+				passwd   => $passwd
+				);
+
+Constructor method.  Creates a new Cisco::UCS object representing a connection 
+to the Cisco UCSM XML API.  
+
+Parameters are:
+
+=over 3
+
+=item cluster
+
+The common name of the target cluster.  This name should be resolvable on the 
+host from which the script is run.
+
+=item username
+
+The username to use for the connection.  This username needs to have the 
+correct RBAC role for the operations that one intends to perform.
+
+=item passwd
+
+The plaintext password of the username specified for the B<username> attribute 
+for the connection.
+
+=item port
+
+The port on which to connect to the UCSM XML API on the target cluster.  This 
+parameter is optional and will default to 443 if not provided.
+
+=item proto
+
+The protocol with which to connect to the UCSM XML API on the target cluster.  
+This value is optional hould be one of 'http' or 'https' and will default to 
+'https' if not provided.
+
+=back
+
+=head3 login ()
+
+	$ucs->login;
+	print "Authentication token is $ucs->cookie\n";
+
+Creates a connection to the XML API interface of a USCM management instance.  
+If sucessful, the attributes of the UCSM management instance are inherited by 
+the object.  Most important of these parameters is 'cookie' representing the 
+authetication token that uniquely identifies the connection and which is 
+subsequently passed transparently on all further communications.
+
+The default time-out value for a token is 10 minutes, therefore if you intend 
+to create a long-running session you should periodically call refresh.
+
+=head3 refresh ()
+
+	$ucs->refresh;
+
+Resets the expiry time limit of the existing authentication token to the 
+default timeout period of 10m.  Usually not necessary for short-lived 
+connections.
+
+=head3 logout ()
+
+	$ucs->logout;
+
+Expires the current authentication token.  This method should always be called 
+on completion of a script to expire the authentication token and free the 
+current session for use by others.  The UCS XML API has a maximum number of 
+available connections, and a maximum number of sessions per user.  In order to 
+ensure that the session remain available (especially if using common 
+credentials), you should always call this method on completion of a script, as 
+an argument to die, or in any eval where a script may fail and exit before 
+logging out;
+
+=head3 cookie ()
+
+	print $ucs->cookie;
+
+Returns the value of the authentication token.
+
+=head3 cluster ()
+
+	print $ucs->cluster;
+
+Returns the value of cluster as given in the constructor.
+
+=head3 dn ()
+
+	print $ucs->dn;
+
+Returns the distinguished name that specifies the base scope of the Cisco::UCS 
+object.
+
+=cut
+
+=head3 get_error_id ( $ID )
+
+	my %error = $ucs->get_error_id($id);
+
+	while (my($key,$value) = each %error) {
+		print "$key:\t$value\n";
+	}
+	
+B<This method is deprecated, please use the equivalent get_error method>.
+
+Returns a hash containing the UCSM event detail for the given error id.  This 
+method takes a single argument; the UCSM error_id of the desired error.
+
+=cut
+
+
+=head3 error ( $id )
+
+	my $error = $ucs->get_error($id);
+	print $error->id . ":" . $error->desc . "\n";
+
+Returns a Cisco::UCS::Fault object representing the specified error.  Note 
+that this is a caching method and will return a cached object that has been 
+retrieved on previous queries should on be available.
+
+If you require a fresh object, consider using the equivalent non-caching 
+B<get_error> method below.
+
+=head2 get_error ( $ID )
+
+Returns a Cisco::UCS::Fault object representing the specified error.  Note 
+that this is a non-caching method and that the UCSM will always be queried 
+for information.  Consequently this method may be more expensive than the 
+equivalent caching method B<error> described above.
+
+=head3 get_errors ()
+
+	map {
+		print '-'x50,"\n";
+		print "ID		: " . $_->id . "\n";
+		print "Severity		: " . $_->severity . "\n";
+		print "Description	: " . $_->description . "\n";
+	} grep {
+		$_->severity !~ /cleared/i;
+	} $ucs->get_errors;
+
+Returns an array of Cisco::UCS::Fault objects with each object representative 
+of a fault on the target system.
+
+=head3 resolve_class ( %ARGS )
+
+This method is used to retrieve objects from the UCSM management heirachy by 
+resolving the classId for specific object types.  This method reflects one of 
+the base methods provided by the UCS XML API for resolution of objects. The 
+method returns an XML::Simple parsed object from the UCSM containing the 
+response.
+
+This method accepts a hash containing the value of the classID to be resolved 
+and unless you have read the UCS XML API Guide and are certain that you know 
+what you want to do, you shouldn't need to alter this method.
+
+=head3 resolve_classes ( %ARGS )
+
+This method is used to retrieve objects from the UCSM management heirachy by 
+resolving several classIds for specific object types.  This method reflects 
+one of the base methods provided by the UCS XML API for resolution of objects. 
+The method returns an XML::Simple object from the UCSM containing the parsed 
+response.
+
+Unless you have read the UCS XML API Guide and are certain that you know what 
+you want to do, you shouldn't need to alter this method.
+
+=head3 resolve_dn ( %ARGS )
+
+	my $blade = $ucs->resolve_dn( dn => 'sys/chassis-1/blade-2');
+
+This method is used to retrieve objects from the UCSM management heirachy by 
+resolving a specific distinguished name (dn) for a managed object.  This 
+method reflects one of the base methods provided by the UCS XML API for 
+resolution of objects. The method returns an XML::Simple parsed object from 
+the UCSM containing the response.
+
+The method accepts a single key/value pair, with the value being the 
+distinguished name of the object.  If not known, the dn can be usually be 
+retrieved by first using one of the other methods to retrieve a list of all 
+object types (i.e. get_blades) and then enumerating the results to extract the 
+dn from the desired object.
+
+	my @blades = $ucs->get_blades;
+
+	foreach my $blade in (@blades) {
+		print "Dn is $blade->{dn}\n";
+	}
+
+Unless you have read the UCS XML API Guide and are certain that you know what you want to do, you shouldn't need
+to alter this method.
+
+=head3 resolve_children ( %ARGS )
+
+	use Data::Dumper;
+
+	my $children = $ucs->resolve_children(dn => 'sys');
+	print Dumper($children);
+
+This method is used to resolve all child objects for a given distinguished 
+named (dn) object in the UCSM management heirachy.  This method reflects one 
+of the base methods provided by the UCS XML API for resolution of objects. The 
+method returns an XML::Simple parsed object from the UCSM containing the 
+response.
+
+In combination with Data::Dumper this is an extremely useful method for further
+development by enumerating the child objects of the specified dn.  Note 
+however, that the response returned from UCSM may not always accurately reflect
+all elements due to folding.
+
+Unless you have read the UCS XML API Guide and are certain that you know what 
+you want to do, you shouldn't need to alter this method.
+
+=head3 get_cluster_status ()
+
+	my $status = $ucs->get_cluster_status;
+
+This method returns an anonymous hash representing a brief overall cluster 
+status.  In the standard configuration of a HA pair of Fabric Interconnects, 
+this status is representative of the cluster as a single managed entity.
+
+=head3 resolve_class_filter ( %ARGS )
+
+	my $associated_servers = 
+		$ucs->resolve_class_filter(	
+					classId		=> 'computeBlade',
+					association	=> 'associatied' 	
+					);
+
+This method is used to retrieve objects from the UCSM management heirachy by 
+resolving the classId for specific object types matching a specified filter 
+composed of any number of key/value pairs that correlate to object attributes.
+
+This method is very similar to the <B>resolve_class method, however a filter 
+can be specified to restrict the objects returned to those having certain 
+characteristics.  This method is largely exploited by subclasses to return 
+specific object types.
+
+The filter is to be specified as any number of name/value pairs in addition to
+the classId parameter.
+
+=cut
+
+=head3 version ()
+
+	my $version = $ucs->version;
+
+This method returns a string containign the running UCSM software version.
+
+=head3 mgmt_entity ( $id )
+
+	print "HA status : " 
+		. $ucs->mgmt_entity(A)->ha_readiness 
+		. "\n";
+	
+	my $mgmt_entity = $ucs->mgmt_entity('B');
+	print $mgmt_entity->leadership;
+
+Returns a Cisco::UCS::MgmtEntity object for the specified management instance 
+(either 'A' or 'B').
+
+This is a caching method and will return a cached copy of a previously 
+retrieved Cisco::UCS::MgmtEntity object should one be available.  If you 
+require a fresh copy of the object then consider using the B<get_mgmt_entity>
+method below.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_mgmt_entity ( $id )
+
+	print "Management services state : " 
+		. $ucs->get_mgmt_entity(A)->mgmt_services_state 
+		. "\n";
+	
+Returns a Cisco::UCS::MgmtEntity object for the specified management instance 
+(either 'A' or 'B').
+
+This method always queries the UCSM for information on the specified management
+entity - consequently this method may be more expensive that the equivalent 
+caching method I<get_mgmt_entity>.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_mgmt_entities ()
+
+	my @mgmt_entities = $ucs->get_mgmt_entities;
+
+	foreach $entity ( @mgmt_entities ) {
+		print "Management entity " 
+			. $entity->id 
+			. " is the " 
+			. $entity->leadership 
+			. " entity\n";
+	}
+
+Returns an array of Cisco::UCS::MgmtEntity objects representing all management 
+entities in the cluster (usually two - 'A' and 'B').
+
+=head3 get_primary_mgmt_entity ()
+
+	my $primary = $ucs->get_primary_mgmt_entity;
+	print "Management entity $entity->{id} is primary\n";
+
+Returns an anonymous hash containing information on the primary UCSM management
+entity object.  This is the active managing instance of UCSM in the target 
+cluster.
+
+=head3 get_subordinate_mgmt_entity ()
+
+	print   'Management entity ', 
+		$ucs->get_subordinate_mgmt_entity->{id}, 
+		' is the subordinate management entity in cluster ',
+		$ucs->{cluster},"\n";
+
+Returns an anonymous hash containing information on the subordinate UCSM 
+management entity object.  
+
+=head3 service_profile ( $ID )
+
+Returns a Cisco::UCS::ServiceProfile object where $ID is the user-specified 
+name of the service profile.
+
+This is a caching method and will return a cached copy of a previously 
+retrieved Cisco::UCS::ServiceProfile object should one be available.  If you 
+require a fresh copy of the object then consider using the 
+B<get_service_profile> method below.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_service_profile ( $ID )
+
+Returns a Cisco::UCS::ServiceProfile object where $ID is the user-specified 
+name of the service profile.
+
+This method always queries the UCSM for information on the specified service 
+profile - consequently this method may be more expensive that the equivalent 
+caching method I<service_profile>.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_service_profiles ()
+
+	my @service_profiles = $ucs->get_service_profiles;
+
+	foreach my $service_profile (@service_profiles) {
+		print "Service Profile: " 
+			. $service_profile->name 
+			. " associated to blade: " 
+			. $service_profile->pnDn 
+			. "\n";
+	}
+
+Returns an array of Cisco::UCS::ServiceProfile objects representing all service
+profiles currently present on the target UCS cluster.
+
+=head3 interconnect ( $ID )
+
+	my $serial = $ucs->interconnect(A)->serial;
+
+	print "Interconnect $_ serial: " 
+		. $ucs->interconnect($_) 
+		. "\n" 
+	for qw(A B);
+
+Returns a Cisco::UCS::Interconnect object for the specified interconnect ID 
+(either A or B).
+
+Note that the default behaviour of this method is to return a cached copy of a 
+previously retrieved Cisco::UCS::Interconnect object if one is available.  
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_interconnect ( $ID )
+
+	my $interconnect = $ucs->get_interconnect(A);
+
+	print $interconnect->model;
+
+Returns a Cisco::UCS::Interconnect object for the specified interconnect ID
+(either A or B).
+
+This method always queries the UCSM for information on the specified 
+interconnect - contrast this with the behaviour of the caching method 
+I<interconnect()>.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_interconnects ()
+
+	my @interconnects = $ucs->get_interconnects;
+
+	foreach my $ic (@interconnects) {
+		print "Interconnect $ic->id operability is $ic->operability\n";
+	}
+
+Returns an array of Cisco::UCS::Interconnect objects.  This is a non-caching 
+method.
+
+=head3 blade ( $ID )
+
+	print "Blade 1/1 serial : " . $ucs->blade('1/1')->serial . "\n;
+
+Returns a Cisco::UCS::Blade object representing the specified blade as given by
+the value of $ID.  The blade ID should be given using the standard Cisco UCS 
+blade identification form as used in the UCSM CLI; namely 
+B<chassis_id/blade_id> where both chassis_id and blade_id are valid numerical 
+values for the target cluster.  Note that you will have to enclose the value of
+$ID in quotation marks to avoid a syntax error.
+
+Note that this is a caching method and the default behaviour of this method is 
+to return a cached copy of a previously retrieved Cisco::UCS::Blade object if 
+one is available.  If a non-cached object is required, then please consider 
+using the equivalent B<get_blade> method below.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_blade ( $ID )
+
+	print "Blade 1/1 serial : " . $ucs->get_blade('1/1')->serial . "\n;
+
+Returns a Cisco::UCS::Blade object representing the specified blade as given by
+the value of $ID.  The blade ID should be given using the standard Cisco UCS 
+blade identification form as used in the UCSM CLI; namely 
+B<chassis_id/blade_id> where both chassis_id and blade_id are valid numerical 
+values for the target cluster.  Note that you will have to enclose the value of
+$ID in quotation marks to avoid a syntax error.
+
+Note that this method is non-caching and always queries the UCSM for 
+information.  Consequently may be more expensive than the equivalent caching 
+B<blade> method described above.
+
+=head3 get_blades ()
+
+	my @blades = $ucs->get_blades();
+
+	foreach my $blade ( @blades ) {
+		print "Model: $blade->{model}\n";
+	}
+
+Returns an array of B<Cisco::UCS::Blade> objects with each object representing 
+a blade within the UCS cluster.
+
+=head3 chassis ( $ID )
+
+	my $chassis = $ucs->chassis(1);
+	print "Chassis 1 serial : " . $chassis->serial . "\n";
+	# or
+	print "Chassis 1 serial : " . $ucs->chassis(1)->serial . "\n";
+
+	foreach my $psu ( $ucs->chassis(1)->get_psus ) {
+		print $psu->id . " thermal : " . $psu->thermal . "\n"
+	}
+
+Returns a Cisco::UCS::Chassis object representing the chassis identified by by 
+the specified value of ID.
+
+Note that this is a caching method and the default behaviour of this method is 
+to return a cached copy of a previously retrieved Cisco::UCS::Chassis object if
+one is available.  If a non-cached object is required, then please consider 
+using the equivalent B<get_chassis> method below.
+
+Please see the B<Caching Methods> section in B<NOTES> for further information.
+
+=head3 get_chassis ( $ID )
+
+	my $chassis = $ucs->get_chassis(1);
+	print "Chassis 1 label : " . $chassis->label . "\n";
+	# or
+	print "Chassis 1 label : " . $ucs->get_chassis(1)->label . "\n";
+
+Returns a Cisco::UCS::Chassis object representing the chassis identified by the
+specified value of ID.
+
+Note that this method is non-caching and always queries the UCSM for 
+information.  Consequently may be more expensive than the equivalent caching 
+B<chassis> method described above.
+
+=head3 get_chassiss
+	
+	my @chassis = $ucs->get_chassiss();
+
+	foreach my $chassis (@chassis) {
+		print "Chassis $chassis->{id} serial number: $chassis->{serial}\n";
+	}
+
+Returns an array of Cisco::UCS::Chassis objects representing all chassis 
+present within the cluster.
+
+Note that this method is named get_chassiss (spelt with two sets of double-s's)
+as there exists no English language collective plural for the word chassis.
+
+=head3 full_state_backup
+
+This method generates a new "full state" type backup for the target UCS 
+cluster.  Internally, this method is implemented as a wrapper method around the
+private backup method.  Required parameters for this method:
+
+=over 3
+
+=item backup_proto 
+
+The protocol to use for transferring the backup from the target UCS cluster to 
+the backup host.  Must be one of: ftp, tftp, scp or sftp.
+
+=item backup_host
+
+The host to which the backup will be transferred.
+
+=item backup_target
+
+The fully qualified name of the file to which the backup is to be saved on the 
+backup host.  This should include the full directory path and the target 
+filename.
+
+=item backup_username
+
+The username to be used for creation of the backup file on the backup host.  
+This username should have write/modify file system access to the backup target 
+location on the backup host using the protocol specified in the backup-proto 
+attribute.
+
+=item backup_passwd
+
+The plaintext password of the user specified for the backup_username attribute.
+
+=back
+
+=head3 all_config_backup
+
+This method generates a new "all configuration" backup for the target UCS 
+cluster.  Internally, this method is implemented as a wrapper method around the
+private backup method.  For the required parameters for this method, please 
+refer to the documentation of the B<full_state_backup> method.
+
+=head3 system_config_backup
+
+This method generates a new "system configuration" backup for the target UCS 
+cluster.  Internally, this method is implemented as a wrapper method around the
+private backup method.  For the required parameters for this method, please 
+refer to the documentation of the B<full_state_backup> method.
+
+=head3 logical_config_backup
+
+This method generates a new "logical configuration" backup for the target UCS 
+cluster.  Internally, this method is implemented as a wrapper method around the
+private backup method.  For the required parameters for this method, please 
+refer to the documentation of the B<full_state_backup> method.
+
 =head1 NOTES
 
 =head2 Caching Methods
 
-Several methods in the module return cached objects that have been previously retrieved by querying UCSM, this is 
-done to improve the performance of methods where a cached copy is satisfactory for the intended purpose.  The trade
-off for the speed and lower resource requirement is that the cached copy is not guaranteed to be an up-to-date 
-representation of the current state of the object.
+Several methods in the module return cached objects that have been previously 
+retrieved by querying UCSM, this is done to improve the performance of methods 
+where a cached copy is satisfactory for the intended purpose.  The trade off 
+for the speed and lower resource requirement is that the cached copy is not 
+guaranteed to be an up-to-date representation of the current state of the 
+object.
 
-As a matter of convention, all caching methods are named after the singular object (i.e. interconnect(), chassis())
-whilst non-caching methods are named I<get_<object>>.  Non-caching methods will always query UCSM for the object,
+As a matter of convention, all caching methods are named after the singular 
+object (i.e. interconnect(), chassis()) whilst non-caching methods are named 
+I<get_<object>>.  Non-caching methods will always query UCSM for the object,
 as will requests for cached objects not present in cache.
 
 =cut
@@ -1170,23 +1210,28 @@ as will requests for cached objects not present in cache.
 
 =item *
 
-The documentation could be cleaner and more thorough.  The module was written some time ago with only minor amounts of time and effort invested since.
+The documentation could be cleaner and more thorough.  The module was written 
+some time ago with only minor amounts of time and effort invested since.
 There's still a vast opportunity for improvement.
 
 =item *
 
-Better error detection and handling.  Liberal use of Carp::croak should ensure that we get some minimal diagnostics and die nicely, and if 
-used according to instructions, things should generally work.  When they don't however, it would be nice to know why.
+Better error detection and handling.  Liberal use of Carp::croak should ensure 
+that we get some minimal diagnostics and die nicely, and if used according to 
+instructions, things should generally work.  When they don't however, it would 
+be nice to know why.
 
 =item *
 
-Detection of request and return type.  Most of the methods are fairly explanatory in what they return, however it would be nice to
-make better use of wantarray to detect what the user wants and handle it accordingly.
+Detection of request and return type.  Most of the methods are fairly 
+explanatory in what they return, however it would be nice to make better use of
+wantarray to detect what the user wants and handle it accordingly.
 
 =item *
 
-Clean up of the UCS package to remove unused methods and improve the ones that we keep.  I'm still split on leaving some of the 
-methods common to most object type (fans, psus) in the main package.
+Clean up of the UCS package to remove unused methods and improve the ones that 
+we keep.  I'm still split on leaving some of the methods common to most object 
+type (fans, psus) in the main package.
 
 =back
 
@@ -1196,9 +1241,11 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to C<bug-cisco-ucs at rt.cpan.org>, 
+or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS>.  I will be 
+notified, and then you'll automatically be notified of progress on your bug as 
+I make changes.
 
 =head1 SUPPORT
 
@@ -1240,5 +1287,3 @@ by the Free Software Foundation; or the Artistic License.
 See http://dev.perl.org/licenses/ for more information.
 
 =cut
-
-1;
