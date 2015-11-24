@@ -1038,11 +1038,11 @@ The plaintext password of the user specified for the backup_username attribute.
 =cut
 
 sub full_state_backup {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
 	$args{backup_type}= 'full-state';
 
-	return ($self->_backup(%args));
+	return ( $self->_backup( %args ) );
 }
 
 =head3 all_config_backup
@@ -1054,11 +1054,11 @@ the B<full_state_backup> method.
 =cut
 
 sub all_config_backup {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
 	$args{backup_type}= 'config-all';
 
-	return ($self->_backup(%args));
+	return ( $self->_backup( %args ) );
 }
 
 =head3 system_config_backup
@@ -1070,11 +1070,11 @@ the B<full_state_backup> method.
 =cut
 
 sub system_config_backup {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
 	$args{backup_type}= 'config-system';
 
-	return ($self->_backup(%args));
+	return ( $self->_backup( %args ) );
 }
 
 =head3 logical_config_backup
@@ -1086,17 +1086,17 @@ the B<full_state_backup> method.
 =cut
 
 sub logical_config_backup {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
 	$args{backup_type}= 'config-logical';
 
-	return ($self->_backup(%args));
+	return ( $self->_backup( %args ) );
 }
 
 sub _backup {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
-	unless (defined $args{backup_type} 	and
+	unless( defined $args{backup_type} 	and
 		defined $args{backup_proto}	and
 		defined $args{backup_host}	and
 		defined $args{backup_target}	and
@@ -1107,31 +1107,44 @@ sub _backup {
 		return
 	}
 
-	$args{admin_state}		= (defined $args{admin_state} ? $args{admin_state} : 'enabled');
-	$args{preserve_pooled_values}	= (defined $args{preserve_pooled_values} ? $args{preserve_pooled_values} : 'yes');
+	$args{admin_state}		= ( defined $args{admin_state} ? $args{admin_state} : 'enabled' );
+	$args{preserve_pooled_values}	= ( defined $args{preserve_pooled_values} ? $args{preserve_pooled_values} : 'yes' );
 
-	unless ($args{backup_type} =~ /(config-all|full-state|config-system|config-logical)/i) {
+	unless ( $args{backup_type} =~ /(config-all|full-state|config-system|config-logical)/i ) {
 		$self->{error} = "Bad backup type ($args{backup_type})";
 		return
 	}
 
-	unless ($args{backup_proto} =~ /^((t|s)?ftp)|(scp)$/i) {
+	unless ( $args{backup_proto} =~ /^((t|s)?ftp)|(scp)$/i ) {
 		$self->{error} = "Bad backup proto' ($args{backup_proto})";
 		return
 	}
 
 	my $address	= $self->get_cluster_status->{address};
 
-	my $xml 	= $self->_ucsm_request('<configConfMos cookie="' . $self->{cookie} . '" inHierarchical="false"><inConfigs><pair key="sys">' .
-				'<topSystem address="' . $address . '" dn="sys" name="' . $self->{cluster} . '">' .
-				'<mgmtBackup adminState="' . $args{admin_state} . '" descr="" preservePooledValues="' . $args{preserve_pooled_values} .
-				'" proto="' . $args{backup_proto} . '" pwd="' . $args{backup_passwd} . '" remoteFile="' . $args{backup_target} . 
-				'" hostname="' . $args{backup_host} . '" dn="backup-' . $args{backup_host} . '" type="' . $args{backup_type} . '" ' .
-				'user="' . $args{backup_username} . '"></mgmtBackup></topSystem></pair></inConfigs></configConfMos>'
-			) or return;
+	my $data = <<"XML";
+<configConfMos cookie="$self->{cookie}" inHierarchical="false">
+  <inConfigs>
+    <pair key="sys">
+      <topSystem address="$address" dn="sys" name="$self->{cluster}">
+        <mgmtBackup adminState="$args{admin_state}" descr="" preservePooledValues="$args{preserve_pooled_values}" 
+          proto="$args{backup_proto}" pwd="$args{backup_passwd}" remoteFile="$args{backup_target}" 
+          rn="backup-$args{backup_host}" type="$args{backup_type}" 
+          user="$args{backup_username}" policyOwner="local">
+        </mgmtBackup>
+      </topSystem>
+    </pair>
+  </inConfigs>
+</configConfMos>
+XML
 
-	if (defined $xml->{'errorCode'}) {
-		my $self->{error} = (defined $xml->{'errorDescr'} ? $xml->{'errorDescr'} : "Unspecified error");
+	my $xml 	= $self->_ucsm_request( $data ) or return;
+
+	if ( defined $xml->{'errorCode'} ) {
+		my $self->{error} = ( defined $xml->{'errorDescr'} 
+					? $xml->{'errorDescr'} 
+					: "Unspecified error"
+				);
 		return
 	}
 
