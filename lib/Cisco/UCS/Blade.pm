@@ -12,7 +12,8 @@ use Cisco::UCS::Common::PowerStats;
 
 our $VERSION = '0.4';
 
-our @ATTRIBUTES	= qw(association availability discovery dn model name operability presence revision serial uuid vendor);
+our @ATTRIBUTES	= qw(association availability discovery dn model name 
+operability presence revision serial uuid vendor);
 
 our %ATTRIBUTES = (
 		admin_state		=> 'adminState',
@@ -46,11 +47,20 @@ sub new {
 	my ($class, %args) = @_;
 	my $self = {};
 	bless $self, $class;
-	defined $args{dn}	? $self->{dn} = $args{dn}		: croak 'dn not defined';
-	defined $args{ucs}	? weaken($self->{ucs} = $args{ucs})	: croak 'dn not defined';
-	my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{computeBlade}};
+
+	defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+	defined $args{ucs}
+		? weaken($self->{ucs} = $args{ucs})
+		: croak 'dn not defined';
+
+	my %attr = %{ $self->{ucs}->resolve_dn( 
+				dn => $self->{dn})->{outConfig}->{computeBlade}
+		};
 	
-	while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+	while ( my ($k, $v) = each %attr ) { $self->{$k} = $v }
 
 	return $self
 }
@@ -58,14 +68,14 @@ sub new {
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) { 
                 *{ __PACKAGE__ . '::' . $pseudo } = sub {
                         my $self = shift;
                         return $self->{$attribute}
                 }   
         }   
 
-        foreach my $attribute (@ATTRIBUTES) {
+        foreach my $attribute ( @ATTRIBUTES ) {
                 *{ __PACKAGE__ . '::' . $attribute } = sub {
                         my $self = shift;
                         return $self->{$attribute}
@@ -75,21 +85,31 @@ sub new {
 
 sub led {
 	my ( $self, $state ) = @_;
+
 	$state = lc $state;
 	$state eq 'on' || $state eq 'off' or return;
 	my $req = <<XML;
-	<configConfMos cookie="$self->{ucs}->{cookie}" inHierarchical="false">
-		<inConfigs>
-        		<pair key="sys/chassis-$self->{chassisId}/blade-$self->{slotId}/locator-led">
-				<equipmentLocatorLed adminState="$state" dn="sys/chassis-$self->{chassisId}/blade-$self->{slotId}/locator-led" id="1" name="" ></equipmentLocatorLed>
-			</pair>
-		</inConfigs>
-	</configConfMos>
+<configConfMos cookie="$self->{ucs}->{cookie}" inHierarchical="false">
+  <inConfigs>
+    <pair key="sys/chassis-$self->{chassisId}/blade-$self->{slotId}/locator-led">
+      <equipmentLocatorLed adminState="$state" 
+        dn="sys/chassis-$self->{chassisId}/blade-$self->{slotId}/locator-led" 
+        id="1" name="" >
+      </equipmentLocatorLed>
+    </pair>
+  </inConfigs>
+</configConfMos>
 XML
+
 	my $xml = $self->{ucs}->_ucsm_request( $req );
 	
 	if ( defined $xml->{'errorCode'} ) {
-		my $self->{error} = (defined $xml->{'errorDescr'} ? $xml->{'errorDescr'} : "Unspecified error");
+		my $self->{error} = 
+			( defined $xml->{'errorDescr'} 
+				? $xml->{'errorDescr'} 
+				: "Unspecified error"
+			);
+
 		print "got error: $self->{error}\n";
 		return
 	}
@@ -99,29 +119,49 @@ XML
 
 sub power_stats {
 	my $self = shift;
+
 	return Cisco::UCS::Common::PowerStats->new( 
-		$self->{ucs}->resolve_dn( dn => "$self->{dn}/board/power-stats" )->{outConfig}->{computeMbPowerStats} )
+			$self->{ucs}->resolve_dn( 
+					dn => "$self->{dn}/board/power-stats" 
+				)->{outConfig}->{computeMbPowerStats} 
+		)
 }
 
 sub power_budget {
 	my $self = shift;
+
 	return Cisco::UCS::Blade::PowerBudget->new(
-		$self->{ucs}->resolve_dn( dn => "$self->{dn}/budget" )->{outConfig}->{powerBudget} )
+			$self->{ucs}->resolve_dn(
+					dn => "$self->{dn}/budget"
+				)->{outConfig}->{powerBudget} 
+	)
 }
 
 sub cpu {
 	my ( $self, $id ) = @_;
-	return ( defined $self->{cpu}->{$id} ? $self->{cpu}->{$id} : $self->get_cpus( $id ) )
+
+	return ( 
+		defined $self->{cpu}->{$id} 
+			? $self->{cpu}->{$id} 
+			: $self->get_cpus( $id ) 
+	)
 }
 
 sub get_cpu {
 	my ( $self, $id ) = @_;
-	return ( $id ? $self->get_cpus( $id ) : undef )
+
+	return ( 
+		$id 	? $self->get_cpus( $id ) 
+			: undef 
+	)
 }
 
 sub get_cpus {
 	my ( $self, $id ) = @_;	
-	my $cpus = $self->{ucs}->resolve_children( dn => "$self->{dn}/board" )->{outConfigs}->{processorUnit};
+
+	my $cpus = $self->{ucs}->resolve_children( 
+					dn => "$self->{dn}/board" 
+				)->{outConfigs}->{processorUnit};
 	my @cpus;
 
 	while ( my ( $cid, $cpu ) = each %$cpus ) {
@@ -137,18 +177,30 @@ sub get_cpus {
 
 sub adaptor {
 	my ( $self, $id ) = @_;
-	return ( defined $self->{adaptor}->{$id} ? $self->{adaptor}->{$id} : $self->get_adaptors( $id ) )
+
+	return ( 
+		defined $self->{adaptor}->{$id} 
+			? $self->{adaptor}->{$id} 
+			: $self->get_adaptors( $id ) 
+	)
 }
 
 sub get_adaptor {
 	my ( $self, $id ) = @_;
-	return ( $id ? $self->get_adaptors( $id ) : undef )
+
+	return ( 
+		$id ? $self->get_adaptors( $id ) 
+		: undef 
+	)
 }
 
 
 sub get_adaptors {
 	my ( $self, $id ) = @_;	
-	my $adaptors = $self->{ucs}->resolve_children( dn => "$self->{dn}" )->{outConfigs}->{adaptorUnit};
+
+	my $adaptors = $self->{ucs}->resolve_children( 
+					dn => "$self->{dn}" 
+				)->{outConfigs}->{adaptorUnit};
 	my @adaptors;
 
 	while ( my ( $aid, $adaptor ) = each %$adaptors ) {
@@ -165,11 +217,11 @@ sub get_adaptors {
 1;
 __END__
 
+=pod
+
 =head1 NAME
 
 Cisco::UCS::Blade - Class for operations with a Cisco UCS blade.
-
-=cut
 
 =head1 SYNOPSIS
 
@@ -183,8 +235,8 @@ Cisco::UCS::Blade - Class for operations with a Cisco UCS blade.
 
         print $chassis(2)->blade(3)->memory_available;
 
-        # Print all blades in all chassis along with a cacti-style listing of the
-        # blades current, minimum and maximum power consumption values.
+        # Print all blades in all chassis along with a cacti-style listing of 
+	# the blades current, minimum and maximum power consumption values.
 
         map { 
                 print "Chassis: " . $_->id ."\n";
@@ -220,10 +272,9 @@ Cisco::UCS::Blade - Class for operations with a Cisco UCS blade.
 
 Cisco::UCS::Blade is a class providing operations with a Cisco UCS Blade.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Blade object
-is created automatically by method calls to a L<Cisco::UCS::Chassis> object.
-
-=cut
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Blade object is created automatically by method calls to a 
+L<Cisco::UCS::Chassis> object.
 
 =head1 METHODS
 
@@ -233,7 +284,8 @@ Returns the administrative state of the specified blade.
 
 =head3 assignment
 
-Returns the dn of the service profile currently assigned to the specified blade.
+Returns the dn of the service profile currently assigned to the specified 
+blade.
 
 =head3 association
 
@@ -265,20 +317,22 @@ returns the checkpoint status of the specified blade.
 
 =head3 cpu ( $id )
 
-Returns the specified CPU in the socket designated by the value of the $id parameter as
-a L<Cisco::UCS::Blade::CPU> object.
+Returns the specified CPU in the socket designated by the value of the $id 
+parameter as a L<Cisco::UCS::Blade::CPU> object.
 
-B<Note> that this is a caching method and will return a previously retrieved and cached
-object if one is available.  See the method description for B<get_cpu> below for non-caching
-behaviour.
+B<Note> that this is a caching method and will return a previously retrieved 
+and cached object if one is available.  See the method description for 
+B<get_cpu> below for non-caching behaviour.
 
 =head3 get_cpu ( $id )
 
-This is a functionally equivalent non-caching implementation of the B<cpu> method.
+This is a functionally equivalent non-caching implementation of the B<cpu> 
+method.
 
 =head3 get_cpus ( $id )
 
-Returns all CPUs in the target blade as an array of L<Cisco::UCS::Blade::CPU> objects.
+Returns all CPUs in the target blade as an array of L<Cisco::UCS::Blade::CPU> 
+objects.
 
 =head3 description
 
@@ -290,11 +344,13 @@ Returns the discovery status of the specified blade.
 
 =head3 dn
 
-Returns the dn (distinguished name) of the specified blade in the UCS management heirarchy.
+Returns the dn (distinguished name) of the specified blade in the UCS 
+management heirarchy.
 
 =head3 id
 
-Returns the id of the specified blade in the chassis  - this is equivalent to the slot ID number (e.g. 1 .. 8).
+Returns the id of the specified blade in the chassis  - this is equivalent to 
+the slot ID number (e.g. 1 .. 8).
 
 =head3 led ( $state )
 
@@ -342,7 +398,8 @@ Returns the number of Ethernet interfaces configured on teh specified blade.
 
 =head3 num_fc_ifs
 
-Returns the number of Fibre Channel interfaces configured on teh specified blade.
+Returns the number of Fibre Channel interfaces configured on teh specified 
+blade.
 
 =head3 num_threads
 
@@ -366,13 +423,13 @@ Returns the presence status of the specified blade.
 
 =head3 power_budget
 
-Returns a L<Cisco::UCS::Blade::PowerBudget> object representing the power budget
-values for the specified blade.
+Returns a L<Cisco::UCS::Blade::PowerBudget> object representing the power 
+budget values for the specified blade.
 
 =head3 power_stats
 
-Returns a L<Cisco::UCS::Common::PowerStats> object representing the power usage
-statistics of the specified blade.
+Returns a L<Cisco::UCS::Common::PowerStats> object representing the power 
+usage statistics of the specified blade.
 
 =head3 revision
 
@@ -384,12 +441,13 @@ Returns the serial number of the specified blade.
 
 =head3 server_id
 
-Returns the ID of the specified blade in chassis/slot notation (e.g. this value would be 2/8
-for a server in the eight slot of the second chassis).
+Returns the ID of the specified blade in chassis/slot notation (e.g. this value 
+would be 2/8 for a server in the eight slot of the second chassis).
 
 =head3 slot_id
 
-Returns the slot ID of the specified blade - this is the same value as returned by the I<id> method.
+Returns the slot ID of the specified blade - this is the same value as 
+returned by the I<id> method.
 
 =head3 user_label
 
@@ -397,12 +455,14 @@ Returns the value for the user-specified label of the designated blade.
 
 =head3 uuid
 
-Returns the UUID of the specified blade - note that this UUID value is the user-specified value and may differ
-to the original UUID value of the blade (see I<uuid_original>).
+Returns the UUID of the specified blade - note that this UUID value is the 
+user-specified value and may differ to the original UUID value of the blade 
+(see I<uuid_original>).
 
 =head3 uuid_original
 
-Returns the original UUID value of the specified blade - this value is the "burned-in" UUID for the blade.
+Returns the original UUID value of the specified blade - this value is the 
+"burned-in" UUID for the blade.
 
 =head3 vendor
 
@@ -415,19 +475,17 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-blade at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Blade>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-blade at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Blade>.  I will be 
+notified, and then you'll automatically be notified of progress on your bug as 
+I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Blade
-
 
 You can also look for information at:
 
@@ -464,6 +522,5 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
