@@ -315,6 +315,25 @@ Returns the chassis ID of the chassis in which the specified blade is located.
 
 returns the checkpoint status of the specified blade.
 
+=head3 adaptor ( $id )
+
+Returns the specified adaptor designated by the value of the $id parameter as 
+a L<Cisco::UCS::Blade::Adaptor> object.
+
+B<Note> that this is a caching method and will return a previously retrieved 
+and cached object if one is available.  See the method description for 
+B<get_adaptor> below for non-caching behaviour.
+
+=head3 get_adaptor ( $id )
+
+This is a functionally equivalent non-caching implementation of the 
+B<adaptor> method.
+
+=head3 get_adaptors ( $id )
+
+Returns all CPUs in the target blade as an array of 
+L<Cisco::UCS::Blade::Adaptor> objects.
+
 =head3 cpu ( $id )
 
 Returns the specified CPU in the socket designated by the value of the $id 
