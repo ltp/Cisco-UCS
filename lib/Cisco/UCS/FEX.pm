@@ -8,7 +8,8 @@ use Scalar::Util qw(weaken);
 
 our $VERSION = "0.11";
 
-our @ATTRIBUTES	= qw(discovery dn id model operability perf power presence revision serial side thermal vendor voltage);
+our @ATTRIBUTES	= qw(discovery dn id model operability perf power presence 
+revision serial side thermal vendor voltage);
 
 our %ATTRIBUTES = (
 		chassis_id	=> 'chassisId',
@@ -18,11 +19,57 @@ our %ATTRIBUTES = (
 		switch_id	=> 'switchId',
 		);
 
+{
+        no strict 'refs';
+
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) {
+                *{ __PACKAGE__ . '::' . $pseudo } = sub {
+                        my $self = shift;
+                        return $self->{$attribute}
+                }
+        }
+
+        foreach my $attribute ( @ATTRIBUTES ) {
+                *{ __PACKAGE__ . '::' . $attribute } = sub {
+                        my $self = shift;
+                        return $self->{$attribute}
+                }
+        }
+
+}
+
+sub new {
+        my ( $class, %args ) = @_; 
+
+        my $self = {}; 
+        bless $self, $class;
+
+        defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+        defined $args{ucs}
+		? weaken($self->{ucs} = $args{ucs})
+		: croak 'ucs not defined';
+
+        my %attr = %{ $self->{ucs}->resolve_dn(
+					dn => $self->{dn}
+				)->{outConfig}->{equipmentIOCard}};
+            
+        while ( my ($k, $v) = each %attr ) { $self->{$k} = $v }
+                    
+        return $self;
+}
+
+1;
+
+__END__
+
+=pod
+
 =head1 NAME
 
 Cisco::UCS::FEX - Class for operations with a Cisco UCS FEX.
-
-=cut
 
 =head1 SYNOPSIS
 
@@ -36,8 +83,9 @@ Cisco::UCS::FEX - Class for operations with a Cisco UCS FEX.
 
 Cisco::UCS::FEX is a class providing operations with a Cisco UCS FEX.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::FEX object
-is created automatically by method calls to a L<Cisco::UCS::Chassis> object.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::FEX object is created automatically by method calls to a 
+L<Cisco::UCS::Chassis> object.
 
 =head1 METHODS
 
@@ -115,22 +163,8 @@ Returns the peer communication status of the FEX.
 
 =head3 switch_id
 
-Returns the ID (A or B) of the Fabric Interconnect to which the FEX is physically attached.
-
-=cut
-
-sub new {
-        my ($class, %args) = @_; 
-        my $self = {}; 
-        bless $self, $class;
-        defined $args{dn}       ? $self->{dn}   = $args{dn}             : croak 'dn not defined';
-        defined $args{ucs}      ? weaken($self->{ucs} = $args{ucs})     : croak 'ucs not defined';
-        my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentIOCard}};
-            
-        while (my ($k, $v) = each %attr) { $self->{$k} = $v }
-                    
-        return $self;
-}
+Returns the ID (A or B) of the Fabric Interconnect to which the FEX is 
+physically attached.
 
 =head1 AUTHOR
 
@@ -138,20 +172,21 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Some methods may return undefined, empty or not yet implemented values.  This is dependent on the
-software and firmware revision level of UCSM and components of the UCS cluster.  This is not a
-bug but is a limitation of UCSM.
+Some methods may return undefined, empty or not yet implemented values.  This 
+is dependent on the software and firmware revision level of UCSM and 
+components of the UCS cluster.  This is not a bug but is a limitation of UCSM.
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-fex at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-FEX>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-fex at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-FEX>.  I will be 
+notified, and then you'll automatically be notified of progress on your bug as 
+I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::FEX
-
 
 You can also look for information at:
 
@@ -175,10 +210,6 @@ L<http://search.cpan.org/dist/Cisco-UCS-FEX/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2012 Luke Poskitt.
@@ -189,26 +220,4 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
 =cut
-
-{
-        no strict 'refs';
-
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
-                *{ __PACKAGE__ . '::' . $pseudo } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }
-        }
-
-        foreach my $attribute (@ATTRIBUTES) {
-                *{ __PACKAGE__ . '::' . $attribute } = sub {
-                        my $self = shift;
-                        return $self->{$attribute}
-                }
-        }
-
-}
-
-1;
