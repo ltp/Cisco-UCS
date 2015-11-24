@@ -277,6 +277,10 @@ Returns a Cisco::UCS::Common::SwitchCard object corresponding to the interface c
 numerical identifier.  Note that this is a caching method and when invoked will return an object 
 retrieved in a previous query if one is available.
 
+=head2 stats
+
+Ret
+
 =cut
 
 =head1 AUTHOR
