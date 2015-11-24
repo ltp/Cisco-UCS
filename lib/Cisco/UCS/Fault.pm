@@ -19,14 +19,24 @@ our %ATTRIBUTES	= (
 		);
 
 sub new {
-        my ($class, %args) = @_; 
+        my ( $class, %args ) = @_; 
+
         my $self = {}; 
         bless $self, $class;
-        defined $args{dn}       ? $self->{dn} = $args{dn}               : croak 'dn not defined';
-        defined $args{ucs}      ? weaken($self->{ucs} = $args{ucs})	: croak 'ucs not defined';
-        my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{faultInst}};
 
-        while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+        defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+        defined $args{ucs}
+		? weaken($self->{ucs} = $args{ucs})
+		: croak 'ucs not defined';
+
+        my %attr = %{ $self->{ucs}->resolve_dn(
+					dn => $self->{dn}
+				)->{outConfig}->{faultInst}};
+
+        while ( my ($k, $v) = each %attr ) { $self->{$k} = $v }
 
         return $self
 }
@@ -34,14 +44,14 @@ sub new {
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) { 
                 *{ __PACKAGE__ . '::' . $pseudo } = sub {
                         my $self = shift;
                         return $self->{$attribute}
                 }   
         }   
 
-        foreach my $attribute (@ATTRIBUTES) {
+        foreach my $attribute ( @ATTRIBUTES ) {
                 *{ __PACKAGE__ . '::' . $attribute } = sub {
                         my $self = shift;
                         return $self->{$attribute}
@@ -49,13 +59,19 @@ sub new {
         }   
 }
 
+1;
+
+__END__
+
+=pod
+
 =head1 NAME
 
 Cisco::UCS::Fault - Class for operations with Cisco UCS fault instances.
 
 =head1 SYNOPSIS
 
-  foreach my $error ($ucs->get_errors) {
+  foreach my $error ( $ucs->get_errors ) {
     print 	"-"x50 . "\n" .
 		"Error		: " . $error->id . "\n" . 
 		"Created	: " . $error->created . "\n" .
@@ -65,10 +81,12 @@ Cisco::UCS::Fault - Class for operations with Cisco UCS fault instances.
   
 =head1 DESCRIPTION
 
-Cisco::UCS::Fault is a class providing operations with Cisco UCS fault instances (errors).
+Cisco::UCS::Fault is a class providing operations with Cisco UCS fault 
+instances (errors).
 
-Note that you are not supposed to call the constructor yourself, rather Cisco::UCS::Fault 
-objects are created for you automatically by calls to methods in Cisco::UCS.
+Note that you are not supposed to call the constructor yourself, rather 
+Cisco::UCS::Fault objects are created for you automatically by calls to 
+methods in Cisco::UCS.
 
 =head1 METHODS
 
@@ -94,7 +112,8 @@ Returns a description of the specified error.
 
 =head2 dn
 
-Returns a distinguished name of the specified error in the UCSM information management heirarchy.
+Returns a distinguished name of the specified error in the UCSM information 
+management heirarchy.
 
 =head2 id
 
@@ -114,7 +133,8 @@ Returns the original severity classification the specified error.
 
 =head2 previous_severity
 
-Returns the severity classification the specified error prior to the most recent transition.
+Returns the severity classification the specified error prior to the most 
+recent transition.
 
 =head2 occur
 
@@ -144,19 +164,17 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-fault at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Fault>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-fault at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Fault>.  I will be 
+notified, and then you'll automatically be notified of progress on your bug as 
+I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Fault
-
 
 You can also look for information at:
 
@@ -194,7 +212,4 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
 =cut
-
-1;
