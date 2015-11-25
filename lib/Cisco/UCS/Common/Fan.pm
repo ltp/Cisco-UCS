@@ -6,11 +6,8 @@ use strict;
 use Scalar::Util	qw(weaken);
 use Carp		qw(croak);
 
-use vars qw($VERSION);
-
-$VERSION	= '0.3';
-
-our @ATTRIBUTES = qw(dn id model operability power presence revision serial thermal tray vendor voltage);
+our @ATTRIBUTES = qw(dn id model operability power presence revision serial 
+thermal tray vendor voltage);
 
 our %ATTRIBUTES	= (
 			performance	=> 'perf',
@@ -36,16 +33,34 @@ our %ATTRIBUTES	= (
 }
 
 sub new {
-	my ($class, %args) = @_;
+	my ( $class, %args ) = @_;
+
 	my $self = {};
 	bless $self, $class;
-	defined $args{dn}	? $self->{dn}	= $args{dn}		: croak 'dn not defined';
-	defined $args{id}	? $self->{id}	= $args{id}		: croak 'id not defined';
-	defined $args{ucs}	? weaken($self->{ucs} = $args{ucs})	: croak 'ucs not defined';
-	my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})};
-	%attr = %{ exists $attr{outConfig}{equipmentFan} ? $attr{outConfig}{equipmentFan} : $attr{outConfig}{equipmentFanModule} };
 
-	while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+	defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+	defined $args{id}
+		? $self->{id} = $args{id}
+		: croak 'id not defined';
+
+	defined $args{ucs}
+		? weaken( $self->{ucs} = $args{ucs} )
+		: croak 'ucs not defined';
+
+	my %attr = %{ $self->{ucs}->resolve_dn(
+						dn => $self->{dn}
+					)
+			};
+
+	%attr = %{ exists $attr{outConfig}{equipmentFan} 
+			? $attr{outConfig}{equipmentFan} 
+			: $attr{outConfig}{equipmentFanModule} 
+	};
+
+	while ( my ($k, $v ) = each %attr) { $self->{$k} = $v }
 
 	return $self;
 }
@@ -62,20 +77,22 @@ Cisco::UCS::Common::Fan - Class for operations with a Cisco UCS fan.
 
 =head1 SYNOPSIS
 
-    print 'Thermal: ' . $ucs->chassis(1)->fan_module(2)->fan(1)->thermal . "\n";
+    print 'Thermal: '. $ucs->chassis(1)->fan_module(2)->fan(1)->thermal ."\n";
 
 =head1 DESCRIPTION
 
 Cisco::UCS::Common::Fan is a class providing operations with a Cisco UCS fan.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::Fan 
-object is created automatically by method calls to other L<Cisco::UCS> objects like L<Cisco::UCS::Chassis::FanModule>.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Common::Fan object is created automatically by method calls to 
+other L<Cisco::UCS> objects like L<Cisco::UCS::Chassis::FanModule>.
 
 =head1 METHODS
 
 =head3 dn
 
-Returns the distinguished name of the Cisco::UCS::Common::Fan object in the Cisco UCS management hierarchy.
+Returns the distinguished name of the Cisco::UCS::Common::Fan object in the 
+Cisco UCS management hierarchy.
 
 =head3 id
 
@@ -142,19 +159,17 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-chassis-fan at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Chassis-Fan>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-chassis-fan at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Chassis-Fan>.  I 
+will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Common::Fan
-
 
 You can also look for information at:
 
@@ -178,10 +193,6 @@ L<http://search.cpan.org/dist/Cisco-UCS-Chassis-Fan/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2012 Luke Poskitt.
@@ -191,7 +202,6 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
 
