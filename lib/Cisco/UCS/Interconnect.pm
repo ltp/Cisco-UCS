@@ -346,7 +346,8 @@ one is available.
 
 =head2 stats
 
-Ret
+Returns a L<Cisco::UCS::Interconnect::Stats> object containing information on
+the fabric interconnects system resources.
 
 =cut
 
