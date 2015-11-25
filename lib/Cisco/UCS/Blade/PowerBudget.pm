@@ -6,7 +6,6 @@ use warnings;
 use Cisco::UCS::Blade::PowerBudget;
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.01';
 our %V_MAP = (
 	adminCommitted	=> 'admin_commited',
 	adminPeak	=> 'admin_peak',
@@ -57,25 +56,35 @@ sub new {
 
 __END__
 
+=pod
+
 =head1 NAME
 
-Cisco::UCS::Blade::PowerBudget - Class for operations with a Cisco UCS blade power budgets.
+Cisco::UCS::Blade::PowerBudget - Class for operations with a Cisco UCS blade 
+power budgets.
 
 =cut
 
 =head1 SYNOPSIS
 
-        # Print all blades in all chassis along with the chassis current output power
-        # and each blades current input power both in watts and as a percentage of
-        # the chassis input power level.
+        # Print all blades in all chassis along with the chassis current 
+	# output power and each blades current input power both in watts and 
+	# as a percentage of the chassis input power level.
 
         map { 
                 my $c_power = $_->stats->output_power;
+
                 printf( "Chassis: %d - Output power: %.3f\n", $_->id, $c_power );
+
                 map {
                         printf( "\tBlade: %d - Input power: %.3f (%.2f%%)\n",
-                        $_->id, $_->power_budget->current_power, 
-                        ( $c_power == 0 ? '-' : ( $_->power_budget->current_power / $c_power * 100 ) ) ) 
+				$_->id, $_->power_budget->current_power, 
+				( $c_power == 0 
+					? '-' 
+					: ( $_->power_budget->current_power 
+						/ $c_power * 100 ) 
+				) 
+			) 
                 }   
                 sort { $a->id <=> $b->id } $_->get_blades 
         } 
@@ -107,12 +116,12 @@ Cisco::UCS::Blade::PowerBudget - Class for operations with a Cisco UCS blade pow
 
 =head1 DECRIPTION
 
-Cisco::UCS::Blade::PowerBudget is a class providing operations with a Cisco UCS blade power budget.
+Cisco::UCS::Blade::PowerBudget is a class providing operations with a Cisco 
+UCS blade power budget.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Blade::PowerBudget object
-is created automatically by method calls on a L<Cisco::UCS::Blade> object.
-
-=cut
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Blade::PowerBudget object is created automatically by method calls 
+on a L<Cisco::UCS::Blade> object.
 
 =head1 METHODS
 
@@ -207,9 +216,11 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-blade-powerbudget at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Blade-PowerBudget>.  I will 
-be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-blade-powerbudget at rt.cpan.org>, or through the web interface
+at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Blade-PowerBudget>.
+I will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 
 =head1 SUPPORT
@@ -254,6 +265,5 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
