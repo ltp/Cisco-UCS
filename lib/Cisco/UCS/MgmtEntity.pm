@@ -6,8 +6,6 @@ use warnings;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
-our $VERSION	= '0.12';
-
 our @ATTRIBUTES	= qw(chassis1 chassis2 chassis3 dn id leadership state);
 
 our %ATTRIBUTES = (
@@ -23,14 +21,24 @@ our %ATTRIBUTES = (
 		);
 
 sub new {
-	my ($class, %args) = @_; 
+	my ( $class, %args ) = @_; 
+
 	my $self = {}; 
 	bless $self, $class;
-	defined $args{dn}	? $self->{dn} = $args{dn}		: croak 'dn not defined';
-	defined $args{ucs}	? weaken($self->{ucs} = $args{ucs})	: croak 'dn not defined';
-	my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{mgmtEntity}};
 
-	while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+	defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+	defined $args{ucs}
+		? weaken($self->{ucs} = $args{ucs})
+		: croak 'dn not defined';
+
+	my %attr = %{ $self->{ucs}->resolve_dn(
+				dn => $self->{dn}
+			)->{outConfig}->{mgmtEntity} };
+
+	while ( my ($k, $v) = each %attr ) { $self->{$k} = $v }
 
 	return $self
 }
@@ -38,14 +46,14 @@ sub new {
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) { 
                 *{ __PACKAGE__ . '::' . $pseudo } = sub {
                         my $self = shift;
                         return $self->{$attribute}
                 }   
         }   
 
-        foreach my $attribute (@ATTRIBUTES) {
+        foreach my $attribute ( @ATTRIBUTES ) {
                 *{ __PACKAGE__ . '::' . $attribute } = sub {
                         my $self = shift;
                         return $self->{$attribute}
@@ -53,18 +61,22 @@ sub new {
         }   
 }
 
+1;
 
+__END__
 
 =head1 NAME
 
-Cisco::UCS::MgmtEntity - Class for operations with a Cisco UCSM Management Entity
-
-=cut
+Cisco::UCS::MgmtEntity - Class for operations with a Cisco UCSM Management 
+Entity
 
 =head1 SYNOPSIS
 	
-	print map {
-			"Management entity " . $_->id . " HA state is " . $_->ha_readiness . "\n"				} $ucs->get_mgmt_entities;
+	map {
+		print "Management entity " 
+			. $_->id . " HA state is " 
+			. $_->ha_readiness . "\n"
+	} $ucs->get_mgmt_entities;
 
 	# prints...
 	# Management entity A HA state is ready
@@ -74,11 +86,12 @@ Cisco::UCS::MgmtEntity - Class for operations with a Cisco UCSM Management Entit
 
 =head1 DECRIPTION
 
-Cisco::UCS::MgmtEntity is a class providing operations with a Cisco UCSM Management Entity.
+Cisco::UCS::MgmtEntity is a class providing operations with a Cisco UCSM 
+Management Entity.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::MgmtEntity 
-object is created automatically by method calls via methods in Cisco::UCS.
-
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::MgmtEntity object is created automatically by method calls via 
+methods in Cisco::UCS.
 
 =head1 METHODS
 
@@ -108,8 +121,8 @@ Returns the IO state of third chassis selected for hardware HA quorum.
 
 =head3 dn
 
-Returns the distinguished name of the management entity in the Cisco UCS information
-management heirarchy.
+Returns the distinguished name of the management entity in the Cisco UCS 
+information management heirarchy.
 
 =head3 ha_failure_reason
 
@@ -149,26 +162,23 @@ Returns the version mismatch state of the specified management entity.
 
 =cut
 
-
 =head1 AUTHOR
 
 Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-mgmtentity at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-MgmtEntity>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-mgmtentity at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-MgmtEntity>.  I 
+will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::MgmtEntity
-
 
 You can also look for information at:
 
@@ -192,10 +202,6 @@ L<http://search.cpan.org/dist/Cisco-UCS-MgmtEntity/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2012 Luke Poskitt.
@@ -208,5 +214,3 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
-
-1; # End of Cisco::UCS::MgmtEntity
