@@ -5,8 +5,6 @@ use warnings;
 
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.01';
-
 our %V_MAP = (
 	inputPower	=> 'input_power',
 	inputPowerAvg	=> 'input_power_avg',
@@ -47,25 +45,39 @@ sub new {
 
 __END__
 
+=pod
+
 =head1 NAME
 
-Cisco::UCS::Chassis::Stats - Class for operations with Cisco UCS chassis power statistics.
+Cisco::UCS::Chassis::Stats - Class for operations with Cisco UCS chassis power 
+statistics.
 
 =cut
 
 =head1 SYNOPSIS
 
-	# Print all blades in all chassis along with the chassis current output power
-	# and each blades current input power both in watts and as a percentage of
-	# the chassis input power level.
+	# Print all blades in all chassis along with the chassis current 
+	# output power and each blades current input power both in watts and 
+	# as a percentage of the chassis input power level.
 
 	map { 
 		my $c_power = $_->stats->output_power;
-		printf( "Chassis: %d - Output power: %.3f\n", $_->id, $c_power );
+
+		printf( "Chassis: %d - Output power: %.3f\n", 
+			$_->id, 
+			$c_power 
+		);
+
 		map {
 			printf( "\tBlade: %d - Input power: %.3f (%.2f%%)\n",
-			$_->id, $_->power_budget->current_power, 
-			( $c_power == 0 ? '-' : ( $_->power_budget->current_power / $c_power * 100 ) ) ) 
+				$_->id, 
+				$_->power_budget->current_power, 
+				( $c_power == 0 
+					? '-' 
+					: ( $_->power_budget->current_power 
+						/ $c_power * 100 ) 
+				)
+			) 
 		}   
 		sort { $a->id <=> $b->id } $_->get_blades 
 	} 
@@ -98,10 +110,12 @@ Cisco::UCS::Chassis::Stats - Class for operations with Cisco UCS chassis power s
 
 =head1 DECRIPTION
 
-Cisco::UCS::Chassis::Stats is a class providing operations with a Cisco UCS chassis power statistics.
+Cisco::UCS::Chassis::Stats is a class providing operations with a Cisco UCS 
+chassis power statistics.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Chassis::Stats 
-object is created automatically by method calls on a L<Cisco::UCS::Chassis> object.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Chassis::Stats object is created automatically by method calls on 
+a L<Cisco::UCS::Chassis> object.
 
 =cut
 
@@ -157,9 +171,11 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-chassis-stats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Chassis-Stats>.  I will 
-be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-chassis-stats at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Chassis-Stats>.  I 
+will be notified, and then you'll automatically be notified of progress on your 
+bug as I make changes.
 
 
 =head1 SUPPORT
@@ -191,10 +207,6 @@ L<http://search.cpan.org/dist/Cisco-UCS-Chassis-Stats/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2013 Luke Poskitt.
@@ -204,6 +216,5 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
