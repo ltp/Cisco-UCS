@@ -5,8 +5,6 @@ use warnings;
 
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.01';
-
 our %V_MAP = (
 	consumedPower	=> 'consumed_power',
 	consumedPowerAvg=> 'consumed_power_avg',
@@ -53,23 +51,26 @@ __END__
 
 =head1 NAME
 
-Cisco::UCS::Common::PowerStats - Class for operations with Cisco UCS power usage statistics.
+Cisco::UCS::Common::PowerStats - Class for operations with Cisco UCS power 
+usage statistics.
 
 =cut
 
 =head1 SYNOPSIS
 
-	# Print all blades in all chassis along with a cacti-style listing of the
-	# blades current, minimum and maximum power consumption values.
+	# Print all blades in all chassis along with a cacti-style listing of 
+	# the blades current, minimum and maximum power consumption values.
 
 	map { 
 		print "Chassis: " . $_->id ."\n";
+
 		map { print "\tBlade: ". $_->id ." - Power consumed -"
 			  . " Current:". $_->power_stats->consumed_power 
 			  . " Max:". $_->power_stats->consumed_power_max 
 			  . " Min:". $_->power_stats->consumed_power_min ."\n" 
 		} 
 		sort { $a->id <=> $b->id } $_->get_blades
+
 	} 
 	sort { 
 		$a->id <=> $b->id 
@@ -92,14 +93,14 @@ Cisco::UCS::Common::PowerStats - Class for operations with Cisco UCS power usage
 	#	Blade: 3 - Power consumed - Current:134.056564 Max:155.085037 Min:131.427994
 	# ...etc.
 
-=head1 DECRIPTION
+=head1 DESCRIPTION
 
-Cisco::UCS::Common::PowerStats is a class providing operations with a Cisco UCS power usage statistics.
+Cisco::UCS::Common::PowerStats is a class providing operations with a Cisco 
+UCS power usage statistics.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::PowerStats object
-is created automatically by method calls on a L<Cisco::UCS::Blade> object.
-
-=cut
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Common::PowerStats object is created automatically by method calls 
+on a L<Cisco::UCS::Blade> object.
 
 =head1 METHODS
 
@@ -169,9 +170,12 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-common-powerstats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PowerStats>.  I will 
-be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-common-powerstats at rt.cpan.org>, or through the web 
+interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PowerStats>.  
+I will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 
 =head1 SUPPORT
@@ -179,7 +183,6 @@ be notified, and then you'll automatically be notified of progress on your bug a
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Common::PowerStats
-
 
 You can also look for information at:
 
@@ -202,10 +205,6 @@ L<http://cpanratings.perl.org/d/Cisco-UCS-Common-PowerStats>
 L<http://search.cpan.org/dist/Cisco-UCS-Common-PowerStats/>
 
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 
