@@ -5,8 +5,6 @@ use warnings;
 
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.01';
-
 our %V_MAP = (
 	inputCurrent	=> 'input_current',
 	inputCurrentAvg	=> 'input_current_avg',
@@ -49,21 +47,26 @@ sub new {
 
 __END__
 
+=pod
+
 =head1 NAME
 
-Cisco::UCS::Common::EnvironmentalStats - Class for operations with Cisco UCS environmental stati.
+Cisco::UCS::Common::EnvironmentalStats - Class for operations with Cisco UCS 
+environmental stati.
 
 =cut
 
 =head1 SYNOPSIS
 
-	# Print all blades in all chassis along with a cacti-style listing of the
-	# blades current, maximum and average CPU temperature values.
+	# Print all blades in all chassis along with a cacti-style listing of 
+	# the blades current, maximum and average CPU temperature values.
 
 	map { 
 		print "Chassis: " . $_->id ."\n";
+
 		map { 
 			print "\tBlade: ". $_->id;
+
 			map {
 				print "\n\t\tCPU: ". $_->id 
 				. "\n\t\t\tCurrent:". $_->env_stats->temperature
@@ -72,7 +75,7 @@ Cisco::UCS::Common::EnvironmentalStats - Class for operations with Cisco UCS env
 
 			}   
 			sort { $a->id <=> $b->id } $_->get_cpus
-		}   
+		}
 		sort { $a->id <=> $b->id } $_->get_blades 
 	} 
 	sort { 
@@ -101,10 +104,12 @@ Cisco::UCS::Common::EnvironmentalStats - Class for operations with Cisco UCS env
 
 =head1 DECRIPTION
 
-Cisco::UCS::Common::EnvironmentalStats is a class providing operations with Cisco UCS environmental stati.
+Cisco::UCS::Common::EnvironmentalStats is a class providing operations with 
+Cisco UCS environmental stati.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::EnvironmentalStats
-object is created automatically by method calls on a L<Cisco::UCS::Blade> object.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Common::EnvironmentalStats object is created automatically by 
+method calls on a L<Cisco::UCS::Blade> object.
 
 =cut
 
@@ -160,17 +165,18 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-common-environmentalstats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-EnvironmentalStats>.  I will 
-be notified, and then you'll automatically be notified of progress on your bug as I make changes.
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-common-environmentalstats at rt.cpan.org>, or through the web 
+interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-EnvironmentalStats>.  
+I will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Common::EnvironmentalStats
-
 
 You can also look for information at:
 
@@ -193,10 +199,6 @@ L<http://cpanratings.perl.org/d/Cisco-UCS-Common-EnvironmentalStats>
 L<http://search.cpan.org/dist/Cisco-UCS-Common-EnvironmentalStats/>
 
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 
