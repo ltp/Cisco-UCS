@@ -6,8 +6,6 @@ use strict;
 use Carp 		qw(croak);
 use Scalar::Util 	qw(weaken);
 
-our $VERSION = '0.11';
-
 our @ATTRIBUTES	= qw(dn name owner pnDn type uuid);
 
 our %ATTRIBUTES = (
@@ -63,14 +61,24 @@ our %ATTRIBUTES = (
 		);
 
 sub new {
-	my ($class, %args) = @_;
+	my ( $class, %args ) = @_;
+
 	my $self = {};
 	bless $self, $class;
-	defined $args{dn}	? $self->{dn} = $args{dn}		: croak 'dn not defined';
-	defined $args{ucs}	? weaken($self->{ucs} = $args{ucs})	: croak 'dn not defined';
-	my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{lsServer}};
+
+	defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+	defined $args{ucs}
+		? weaken( $self->{ucs} = $args{ucs} )
+		: croak 'dn not defined';
+
+	my %attr = %{ $self->{ucs}->resolve_dn(
+				dn => $self->{dn}
+			)->{outConfig}->{lsServer} };
 	
-	while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+	while ( my ($k, $v) = each %attr ) { $self->{$k} = $v }
 
 	return $self
 }
@@ -78,14 +86,14 @@ sub new {
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) { 
                 *{ __PACKAGE__ . '::' . $pseudo } = sub {
                         my $self = shift;
                         return $self->{$attribute}
                 }   
         }   
 
-        foreach my $attribute (@ATTRIBUTES) {
+        foreach my $attribute ( @ATTRIBUTES ) {
                 *{ __PACKAGE__ . '::' . $attribute } = sub {
                         my $self = shift;
                         return $self->{$attribute}
@@ -99,23 +107,25 @@ __END__
 
 =head1 NAME
 
-Cisco::UCS::ServiceProfile - Class for operations with a Cisco UCS Service Profile.
-
-=cut
+Cisco::UCS::ServiceProfile - Class for operations with a Cisco UCS Service 
+Profile.
 
 =head1 SYNOPSIS
 
 	my $profile = $ucs->service_profile('profile-1');
-	print "Profile " . $profile->name . " is bound to physical DN " . $profile->pnDn . "\n";
+	print "Profile " . $profile->name 
+		. " is bound to physical DN " . $profile->pnDn . "\n";
 
 	print $ucs->service_profile('profile-2')->uuid;
 
 =head1 DECRIPTION
 
-Cisco::UCS::ServiceProfile is a class providing operations with a Cisco UCS Service Profile.
+Cisco::UCS::ServiceProfile is a class providing operations with a Cisco UCS 
+Service Profile.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::ServiceProfile 
-object is created automatically by method calls via methods in Cisco::UCS.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::ServiceProfile object is created automatically by method calls via 
+methods in Cisco::UCS.
 
 =head1 METHODS
 
@@ -149,8 +159,8 @@ Returns the user-specified description of the service profile.
 
 =head3 dn
 
-Returns the distinguished name of the service profile in the UCS management information
-heirarchy.
+Returns the distinguished name of the service profile in the UCS management 
+information heirarchy.
 
 =head3 dynamic_conn_policy_name
 
@@ -263,7 +273,8 @@ Returns the operational management access policy name for the service profile.
 
 =head3 oper_mgmt_fw_policy_name
 
-Returns the operational management firmware policy name for the service profile.
+Returns the operational management firmware policy name for the service 
+profile.
 
 =head3 oper_power_policy_name
 
@@ -291,7 +302,8 @@ Returns the operational statictics policy name for the service profile.
 
 =head3 oper_vcon_profile_name
 
-Returns the operational virtual connection profile name for the service profile.
+Returns the operational virtual connection profile name for the service 
+profile.
 
 =head3 owner
 
@@ -324,8 +336,9 @@ Returns the statistics policy name for the service profile.
 
 =head3 type
 
-Returns the type of the service profile - for service profiles this will return the
-string of 'instance', for service profile templates this will return the string 'template'.
+Returns the type of the service profile - for service profiles this will 
+return the string of 'instance', for service profile templates this will 
+return the string 'template'.
 
 =head3 user_label
 
@@ -350,15 +363,17 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-serviceprofile at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-ServiceProfile>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-serviceprofile at rt.cpan.org>, or through the web interface 
+at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-ServiceProfile>.  
+I will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 TO DO
 
-This module barely scratches the surface in terms of available service profile information.
-Future versions will provide access to virtual interface configuration and statistics and
-environmental statictics.
+This module barely scratches the surface in terms of available service profile 
+information. Future versions will provide access to virtual interface 
+configuration and statistics and environmental statictics.
 
 =head1 SUPPORT
 
@@ -402,6 +417,5 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
