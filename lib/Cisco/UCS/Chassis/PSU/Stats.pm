@@ -6,8 +6,6 @@ use strict;
 use Carp qw(croak);
 use Scalar::Util qw(weaken);
 
-our $VERSION	= '0.11';
-
 our %ATTRIBUTES	= (
 		ambientTemp	=> 'ambient_temp',
 		ambientTempAvg	=> 'ambient_temp_avg',
@@ -67,6 +65,7 @@ our %ATTRIBUTES	= (
 
 sub new {
         my ( $class, $args ) = @_;
+
         my $self = bless {}, $class;
 
 	foreach my $var ( keys %$args ) {
@@ -79,6 +78,8 @@ sub new {
 1;
 
 __END__
+
+=pod
 
 =head1 NAME
 
@@ -98,10 +99,16 @@ Cisco::UCS::Common::PSU - Class for operations with a Cisco UCS PSU.
 	# Print the output power of all chassis, and the output of 
 	# each PSU in each chassis
 	map { 
-		printf( "Chassis: %d - Output power: %.3f\n", $_->id, $_->stats->output_power );
+		printf( "Chassis: %d - Output power: %.3f\n", 
+			$_->id, 
+			$_->stats->output_power 
+		);
+
 		map {
 			printf( "\tPSU: %d - Ouput power: %s\n",
-			$_->id, $_->stats->output_power ) 
+				$_->id,
+				$_->stats->output_power 
+			)
 		}   
 		sort { $a->id <=> $b->id } $_->get_psus
 	} 
@@ -123,14 +130,14 @@ Cisco::UCS::Common::PSU - Class for operations with a Cisco UCS PSU.
 	# 	PSU: 4 - Ouput power: 374.696991
 	# ... etc.
 
-
 =head1 DESCRIPTION
 
-Cisco::UCS::Common::PSU::Stats is a class providing common operations with Cisco UCS PSU power 
-and environmental statistics.
+Cisco::UCS::Common::PSU::Stats is a class providing common operations with 
+Cisco UCS PSU power and environmental statistics.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::PSU::Stats
-object is created for you automatically by the stats() method call in L<Cisco::UCS::Chassis::PSU>.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Common::PSU::Stats object is created for you automatically by the 
+stats() method call in L<Cisco::UCS::Chassis::PSU>.
 
 =head1 METHODS
 
@@ -182,21 +189,21 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Some methods may return undefined, empty or not yet implemented values.  This is dependent on the
-software and firmware revision level of UCSM and components of the UCS cluster.  This is not a
-bug but is a limitation of UCSM.
+Some methods may return undefined, empty or not yet implemented values.  This 
+is dependent on the software and firmware revision level of UCSM and 
+components of the UCS cluster.  This is not a bug but is a limitation of UCSM.
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-common-psu-stats at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PSU-Stats>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-common-psu-stats at rt.cpan.org>, or through the web interface 
+at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PSU-Stats>.  
+I will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Common::PSU::Stats
-
 
 You can also look for information at:
 
