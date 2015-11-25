@@ -7,9 +7,8 @@ use Cisco::UCS::Common::EthernetPort;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
-our $VERSION 	= '0.21';
-
-our @ATTRIBUTES = qw(dn id model operability power presence revision serial state thermal vendor voltage);
+our @ATTRIBUTES = qw(dn id model operability power presence revision serial 
+state thermal vendor voltage);
 
 our %ATTRIBUTES	= (
 			description	=> 'descr',
@@ -20,45 +19,75 @@ our %ATTRIBUTES	= (
 
 
 sub new {
-        my ($class, %args) = @_; 
+        my ( $class, %args ) = @_;
+
         my $self = {}; 
         bless $self, $class;
-        defined $args{dn}       ? $self->{dn}   = $args{dn}             : croak 'dn not defined';
-        defined $args{ucs}      ? weaken($self->{ucs} = $args{ucs})     : croak 'ucs not defined';
-        my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentSwitchCard}};
+
+        defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+        defined $args{ucs}
+		? weaken($self->{ucs} = $args{ucs})
+		: croak 'ucs not defined';
+
+        my %attr = %{ $self->{ucs}->resolve_dn(
+				dn => $self->{dn}
+			)->{outConfig}->{equipmentSwitchCard} };
     
-        while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+        while ( my ( $k, $v ) = each %attr ) { $self->{$k} = $v }
     
         return $self;
 }
 
 sub eth_port {
-	my ($self,$id) = @_;
-	return ( defined $self->{eth_port}->{$id} ? $self->{eth_port}->{$id} : $self->get_eth_port($id) )
+	my ( $self,$id ) = @_;
+
+	return ( defined $self->{eth_port}->{$id}
+			? $self->{eth_port}->{$id}
+			: $self->get_eth_port($id) 
+	)
 }
 
 sub get_eth_port {
-	my ($self, $id)	= @_;
-	return ( $id ? $self->get_eth_ports($id) : undef )
+	my ( $self, $id ) = @_;
+
+	return ( $id 
+		? $self->get_eth_ports($id) 
+		: undef 
+	)
 }
 
 sub get_eth_ports {
-        my ($self, $id)	= @_;
-        return $self->{ucs}->_get_child_objects(id => $id, type => 'etherPIo', class => 'Cisco::UCS::Common::EthernetPort', attr => 'eth_port', self => $self,
-                                        	uid => 'portId', class_filter => { classId => 'etherPIo', slotId => $self->{id}, switchId => $self->{id} } )
+        my ( $self, $id ) = @_;
+
+        return $self->{ucs}->_get_child_objects(
+			id	=> $id,
+			type	=> 'etherPIo',
+			class	=> 'Cisco::UCS::Common::EthernetPort',
+			attr	=> 'eth_port',
+			self	=> $self,
+			uid	=> 'portId',
+			class_filter => { 
+				classId		=> 'etherPIo',
+				slotId		=> $self->{id},
+				switchId	=> $self->{id} 
+			}
+	)
 }
 
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) { 
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) { 
                 *{ __PACKAGE__ . '::' . $pseudo } = sub {
                         my $self = shift;
                         return $self->{$attribute}
                 }   
         }   
 
-        foreach my $attribute (@ATTRIBUTES) {
+        foreach my $attribute ( @ATTRIBUTES ) {
                 *{ __PACKAGE__ . '::' . $attribute } = sub {
                         my $self = shift;
                         return $self->{$attribute}
@@ -67,9 +96,14 @@ sub get_eth_ports {
 
 }
 
+1;
+
+__END__
+
 =head1 NAME
 
-Cisco::UCS::Common::SwitchCard - Class for operations with a Cisco UCS switch card.
+Cisco::UCS::Common::SwitchCard - Class for operations with a Cisco UCS 
+switch card.
 
 =cut
 
@@ -83,14 +117,16 @@ Cisco::UCS::Common::SwitchCard - Class for operations with a Cisco UCS switch ca
 	print $switchcard->num_ports;
 	print $switchcard->description;
 
-Cisco::UCS::Common::SwitchCard is a class used to represent a single Ethernet port in a Cisco::UCS
-system.  This class provides functionality to retrieve information and statistics for Ethernet ports.
+Cisco::UCS::Common::SwitchCard is a class used to represent a single Ethernet 
+port in a Cisco::UCS system.  This class provides functionality to retrieve 
+information and statistics for Ethernet ports.
 
-Please note that you should not need to call the constructor directly as Cisco::UCS::Common::SwitchCard
-objects are created for you by the methods in other Cisco::UCS packages like Cisco::UCS::Interconnect.
+Please note that you should not need to call the constructor directly as 
+Cisco::UCS::Common::SwitchCard objects are created for you by the methods in 
+other Cisco::UCS packages like Cisco::UCS::Interconnect.
 
-Dependent on UCSM version, some attributes of the Ethernet port may not be provided and hence the
-accessor methods may return an empty string.
+Dependent on UCSM version, some attributes of the Ethernet port may not be 
+provided and hence the accessor methods may return an empty string.
 
 =head1 METHODS
 
@@ -100,32 +136,36 @@ Returns the vendor description of the switchcard.
 
 =head2 dn
 
-Returns the distinguished name of the switchcard object in the UCSM management information model.
+Returns the distinguished name of the switchcard object in the UCSM management 
+information model.
 
 =head2 eth_port ( $id )
 
-Returns a Ciscoo::UCS::Common::EthernetPort object representing the requested Ethernet port (given by the
-value of $id) on the switchcard.
+Returns a Cisco::UCS::Common::EthernetPort object representing the requested 
+Ethernet port (given by the value of $id) on the switchcard.
 
-Note that this is a caching method and a previously retrieved Ethernet port object will be returned if
-present.  Should you require a fresh object, use the B<get_eth_port> method described below.
+Note that this is a caching method and a previously retrieved Ethernet port 
+object will be returned if present.  Should you require a fresh object, use 
+the B<get_eth_port> method described below.
 
 =head2 get_eth_port ( $id )
 
-Returns a Cisco::UCS::Common::EthernetPort object representing the requested Ethernet port (given by the
-value of $id) on the switchcard.
+Returns a Cisco::UCS::Common::EthernetPort object representing the requested 
+Ethernet port (given by the value of $id) on the switchcard.
 
-Note that this is a non-caching method and the UCSM will always be queried when this method is invoked.
-Subsequently, this method may be more expensive than the caching method B<eth_port> described above.
+Note that this is a non-caching method and the UCSM will always be queried 
+when this method is invoked. Subsequently, this method may be more expensive 
+than the caching method B<eth_port> described above.
 
 =head2 get_eth_ports
 
-Returns an array of Cisco::UCS::Common::EthernetPort objects representing all Etehrnet ports present on 
-the specified card.
+Returns an array of Cisco::UCS::Common::EthernetPort objects representing all 
+Etehrnet ports present on the specified card.
 
 =head2 id
 
-Returns the numerical identifier of the switchcard within the fabric interconnect.
+Returns the numerical identifier of the switchcard within the fabric 
+interconnect.
 
 =head2 model
 
@@ -187,19 +227,18 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-common-switchcard at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-SwitchCard>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-common-switchcard at rt.cpan.org>, or through the web 
+interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-SwitchCard>.  
+I will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Common::SwitchCard
-
 
 You can also look for information at:
 
@@ -223,10 +262,6 @@ L<http://search.cpan.org/dist/Cisco-UCS-Common-SwitchCard/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2012 Luke Poskitt.
@@ -237,7 +272,4 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
 =cut
-
-1;
