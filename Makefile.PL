@@ -16,6 +16,6 @@ WriteMakefile(
         'Test::More'			=> 0,
         'XML::Simple'			=> 0,
     },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'Cisco-UCS-*' },
+    dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean => { FILES => 'Cisco-UCS-*' },
 );

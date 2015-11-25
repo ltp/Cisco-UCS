@@ -25,6 +25,7 @@ pod_coverage_ok( 'Cisco::UCS::Chassis::Stats',		{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::Fault', 			{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::FEX',	 		{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::Interconnect', 		{ also_private => [ 'new' ] } );
+pod_coverage_ok( 'Cisco::UCS::Interconnect::Stats',	{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::MgmtEntity', 		{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::ServiceProfile', 		{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::Common::EthernetPort', 	{ also_private => [ 'new' ] } );
