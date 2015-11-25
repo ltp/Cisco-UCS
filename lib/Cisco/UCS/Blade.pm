@@ -10,8 +10,6 @@ use Cisco::UCS::Blade::CPU;
 use Cisco::UCS::Blade::PowerBudget;
 use Cisco::UCS::Common::PowerStats;
 
-our $VERSION = '0.4';
-
 our @ATTRIBUTES	= qw(association availability discovery dn model name 
 operability presence revision serial uuid vendor);
 
