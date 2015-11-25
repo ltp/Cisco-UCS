@@ -50,6 +50,8 @@ sub new {
 
 __END__
 
+=pod
+
 =head1 NAME
 
 Cisco::UCS::Interconnect::Stats - utility class for representing Cisco UCS 
@@ -179,7 +181,7 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS-Interconnect-Stats>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cisco-UCS>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
