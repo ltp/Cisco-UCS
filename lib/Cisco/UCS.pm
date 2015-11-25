@@ -874,7 +874,7 @@ This method is used to retrieve objects from the UCSM management heirachy by
 resolving the classId for specific object types matching a specified filter 
 composed of any number of key/value pairs that correlate to object attributes.
 
-This method is very similar to the <B>resolve_class method, however a filter 
+This method is very similar to the B<resolve_class> method, however a filter 
 can be specified to restrict the objects returned to those having certain 
 characteristics.  This method is largely exploited by subclasses to return 
 specific object types.

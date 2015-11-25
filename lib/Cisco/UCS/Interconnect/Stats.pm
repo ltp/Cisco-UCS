@@ -90,7 +90,7 @@ a Cisco::UCS::Interconnect::Stats object will be created for you when invoking
 methods in parent classes, such as the B<stats()> method in 
 L<Cisco::UCS::Interconnect>.
 
-=head1 METHODS
+=head2 METHODS
 
 =head3 load
 

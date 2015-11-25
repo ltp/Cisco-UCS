@@ -15,7 +15,6 @@ eval "use Pod::Coverage $min_pc";
 plan skip_all => "Pod::Coverage $min_pc required for testing POD coverage"
     if $@;
 
-#pod_coverage_ok( "Cisco::UCS", "Cisco::UCS POD coverage OK" );
 pod_coverage_ok( 'Cisco::UCS' );
 pod_coverage_ok( 'Cisco::UCS::Blade',	 		{ also_private => [ 'new' ] } );
 pod_coverage_ok( 'Cisco::UCS::Blade::CPU',		{ also_private => [ 'new' ] } );
