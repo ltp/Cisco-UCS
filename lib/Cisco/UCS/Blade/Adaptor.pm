@@ -5,7 +5,6 @@ use warnings;
 
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.01';
 our %V_MAP = (
 	'adminPowerState'	=> 'admin_pwoer_state',
 	'baseMac'		=> 'base_mac',
@@ -58,11 +57,19 @@ sub new {
 
 sub env_stats {
         my $self = shift;
+
         return Cisco::UCS::Common::EnvironmentalStats->new(
-                $self->{ucs}->resolve_dn( dn => "$self->{dn}/env-stats" )->{outConfig}->{processorEnvStats} )
+                $self->{ucs}->resolve_dn( 
+				dn => "$self->{dn}/env-stats" 
+			)->{outConfig}->{processorEnvStats} 
+	)
 }
 
 1;
+
+__END__
+
+=pod
 
 =head1 NAME
 
@@ -72,12 +79,13 @@ Cisco::UCS::Blade::CPU - Class for operations with a Cisco UCS Blade CPUs.
 
 =head1 SYNOPSIS
 
-	# Print all blades in all chassis along with a cacti-style listing of the
-	# blades current, minimum and maximum power consumption values.
+	# Print all blades in all chassis along with a cacti-style listing of 
+	# the blades current, minimum and maximum power consumption values.
 
 	map { 
 		print "Chassis: " . $_->id ."\n";
-		map { print "\tCommon::PowerStats: ". $_->id ." - Power consumed -"
+		map { print "\tCommon::PowerStats: "
+			  . $_->id ." - Power consumed -"
 			  . " Current:". $_->power_stats->consumed_power 
 			  . " Max:". $_->power_stats->consumed_power_max 
 			  . " Min:". $_->power_stats->consumed_power_min ."\n" 
@@ -107,10 +115,12 @@ Cisco::UCS::Blade::CPU - Class for operations with a Cisco UCS Blade CPUs.
 
 =head1 DECRIPTION
 
-Cisco::UCS::Blade::CPU is a class providing operations with a Cisco UCS Blade CPU.
+Cisco::UCS::Blade::CPU is a class providing operations with a Cisco UCS Blade 
+CPU.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Blade::CPU object
-is created automatically by method calls on a L<Cisco::UCS::Blade> object.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Blade::CPU object is created automatically by method calls on a 
+L<Cisco::UCS::Blade> object.
 
 =cut
 
@@ -135,7 +145,8 @@ L<Cisco::UCS::Common::EnvironmentalStats> object.
 
 =head3 dn
 
-Returns the distinguished name of the CPU in the UCS information management heirarchy.
+Returns the distinguished name of the CPU in the UCS information management 
+heirarchy.
 
 =head3 id
 
@@ -215,9 +226,11 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-blade-cpu at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Blade-CPU>.  I will 
-be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-blade-cpu at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Blade-CPU>.  I will 
+be notified, and then you'll automatically be notified of progress on your bug 
+as I make changes.
 
 
 =head1 SUPPORT
@@ -225,7 +238,6 @@ be notified, and then you'll automatically be notified of progress on your bug a
 You can find documentation for this module with the perldoc command.
 
     perldoc Cisco::UCS::Blade::CPU
-
 
 You can also look for information at:
 
