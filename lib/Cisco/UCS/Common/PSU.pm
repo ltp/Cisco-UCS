@@ -6,9 +6,8 @@ use strict;
 use Carp qw(croak);
 use Scalar::Util qw(weaken);
 
-our $VERSION	= '0.11';
-
-our @ATTRIBUTES	= qw(dn id model operability power presence revision serial thermal vendor voltage);
+our @ATTRIBUTES	= qw(dn id model operability power presence revision serial 
+thermal vendor voltage);
 
 our %ATTRIBUTES	= (
 		operational	=> 'operState',
@@ -52,14 +51,24 @@ our %ATTRIBUTES	= (
 
 
 sub new {
-        my ($class, %args) = @_;
+        my ( $class, %args ) = @_;
+
         my $self = {};
         bless $self, $class;
-        defined $args{dn}       ? $self->{dn}   = $args{dn}             : croak 'dn not defined';
-        defined $args{ucs}      ? weaken($self->{ucs} = $args{ucs})     : croak 'ucs not defined';
-        my %attr = %{$self->{ucs}->resolve_dn(dn => $self->{dn})->{outConfig}->{equipmentPsu}};
+
+        defined $args{dn}
+		? $self->{dn} = $args{dn}
+		: croak 'dn not defined';
+
+        defined $args{ucs}
+		? weaken($self->{ucs} = $args{ucs})
+		: croak 'ucs not defined';
+
+        my %attr = %{ $self->{ucs}->resolve_dn(
+					dn => $self->{dn}
+				)->{outConfig}->{equipmentPsu} };
         
-        while (my ($k, $v) = each %attr) { $self->{$k} = $v }
+        while ( my ($k, $v) = each %attr ) { $self->{$k} = $v }
                 
         return $self;
 }
@@ -67,15 +76,24 @@ sub new {
 {
         no strict 'refs';
 
-        while ( my ($pseudo, $attribute) = each %ATTRIBUTES ) {
-                *{ __PACKAGE__ . '::' . $pseudo } = sub { return $_[0]->{$attribute} }
+        while ( my ( $pseudo, $attribute ) = each %ATTRIBUTES ) {
+                *{ __PACKAGE__ . '::' . $pseudo } = sub { 
+			return $_[0]->{$attribute} 
+		}
         }
 
         foreach my $attribute (@ATTRIBUTES) {
-                *{ __PACKAGE__ . '::' . $attribute } = sub { return $_[0]->{$attribute} }
+                *{ __PACKAGE__ . '::' . $attribute } = sub { 
+			return $_[0]->{$attribute} 
+		}
         }
 }
 
+1;
+
+__END__
+
+=pod
 
 =head1 NAME
 
@@ -94,10 +112,12 @@ Cisco::UCS::Common::PSU - Class for operations with a Cisco UCS PSU.
 
 =head1 DESCRIPTION
 
-Cisco::UCS::Common::PSU is a class providing common operations with a Cisco UCS PSU.
+Cisco::UCS::Common::PSU is a class providing common operations with a Cisco 
+UCS PSU.
 
-Note that you are not supposed to call the constructor yourself, rather a Cisco::UCS::Common::PSU
-object is created for you automatically by query methods in other classes like L<Cisco::UCS::Chassis>.
+Note that you are not supposed to call the constructor yourself, rather a 
+Cisco::UCS::Common::PSU object is created for you automatically by query 
+methods in other classes like L<Cisco::UCS::Chassis>.
 
 =head1 METHODS
 
@@ -159,14 +179,15 @@ Luke Poskitt, C<< <ltp at cpan.org> >>
 
 =head1 BUGS
 
-Some methods may return undefined, empty or not yet implemented values.  This is dependent on the
-software and firmware revision level of UCSM and components of the UCS cluster.  This is not a
-bug but is a limitation of UCSM.
+Some methods may return undefined, empty or not yet implemented values.  This 
+is dependent on the software and firmware revision level of UCSM and 
+components of the UCS cluster.  This is not a bug but is a limitation of UCSM.
 
-Please report any bugs or feature requests to C<bug-cisco-ucs-common-psu at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PSU>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
+Please report any bugs or feature requests to 
+C<bug-cisco-ucs-common-psu at rt.cpan.org>, or through the web interface at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cisco-UCS-Common-PSU>.  I 
+will be notified, and then you'll automatically be notified of progress on 
+your bug as I make changes.
 
 =head1 SUPPORT
 
@@ -197,10 +218,6 @@ L<http://search.cpan.org/dist/Cisco-UCS-Common-PSU/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2012 Luke Poskitt.
@@ -211,7 +228,4 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
 =cut
-
-1;
