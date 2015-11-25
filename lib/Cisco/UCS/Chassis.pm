@@ -10,9 +10,8 @@ use Cisco::UCS::Chassis::PSU;
 use Cisco::UCS::Chassis::Stats;
 use Carp qw(croak);
 use Scalar::Util qw(weaken);
-use vars qw($VERSION @ISA);
+use vars qw(@ISA);
 
-$VERSION = '0.3';
 @ISA = qw(Cisco::UCS);
 our %ATTRIBUTES = (
 			adminState	=> 'admin_state',
