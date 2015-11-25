@@ -6,9 +6,8 @@ use warnings;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
-our $VERSION	= '0.11';
-
-our @ATTRIBUTES	= qw(ack code cause created dn id occur rule severity tags type);
+our @ATTRIBUTES	= qw(ack code cause created dn id occur rule severity tags 
+type);
 
 our %ATTRIBUTES	= (
 		last_transition		=> 'lastTransition',
