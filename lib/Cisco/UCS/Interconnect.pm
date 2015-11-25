@@ -344,12 +344,11 @@ card specified by the numerical identifier.  Note that this is a caching
 method and when invoked will return an object retrieved in a previous query if 
 one is available.
 
-=head2 stats
+=head2 stats ()
 
 Returns a L<Cisco::UCS::Interconnect::Stats> object containing information on
 the fabric interconnects system resources.
 
-=cut
 
 =head1 AUTHOR
 
