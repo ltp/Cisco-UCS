@@ -1,6 +1,9 @@
 Revision history for Cisco-UCS
 
-0.35	Wed 25 Nov 2015 <ltp@cpan.org>
+0.4	Thu 26 Nov 2015 <ltp@cpan.org>
+	- Release 0.04 - fixed VERSION in all modules.
+
+0.37	Wed 25 Nov 2015 <ltp@cpan.org>
 	- Updated _backup() sub for changes with later versions of UCSM.
 	- Added Cisco::UCS::Interconnect::Stats.
 	- Code and documentation tidy up.

@@ -6,13 +6,15 @@ use strict;
 use Scalar::Util	qw(weaken);
 use Carp		qw(croak);
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES = qw(dn id model operability power presence revision serial 
 thermal tray vendor voltage);
 
 our %ATTRIBUTES	= (
-			performance	=> 'perf',
-			oper_state	=> 'operState'
-		);
+	performance	=> 'perf',
+	oper_state	=> 'operState'
+);
 
 {
 	no strict 'refs';

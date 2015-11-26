@@ -13,24 +13,27 @@ use Scalar::Util qw(weaken);
 use vars qw(@ISA);
 
 @ISA = qw(Cisco::UCS);
+
+our $VERSION = '0.4';
+
 our %ATTRIBUTES = (
-			adminState	=> 'admin_state',
-			connPath	=> 'conn_path',
-			connStatus	=> 'conn_status',
-			dn		=> 'dn',
-			id		=> 'id',
-			managingInst	=> 'managing_instance',
-			model		=> 'model',
-			operState	=> 'oper_state',
-			operability	=> 'operability',
-			power		=> 'power',
-			presence	=> 'presence',
-			seepromOperState=> 'seeprom_oper_state',
-			serial		=> 'serial',
-			thermal		=> 'thermal',
-			usrLbl		=> 'label',
-			vendor		=> 'vendor',
-                );
+	adminState	=> 'admin_state',
+	connPath	=> 'conn_path',
+	connStatus	=> 'conn_status',
+	dn		=> 'dn',
+	id		=> 'id',
+	managingInst	=> 'managing_instance',
+	model		=> 'model',
+	operState	=> 'oper_state',
+	operability	=> 'operability',
+	power		=> 'power',
+	presence	=> 'presence',
+	seepromOperState=> 'seeprom_oper_state',
+	serial		=> 'serial',
+	thermal		=> 'thermal',
+	usrLbl		=> 'label',
+	vendor		=> 'vendor',
+);
 
 {
         no strict 'refs';

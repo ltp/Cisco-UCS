@@ -6,21 +6,23 @@ use warnings;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
+our $VERSION = '0.4';
+
 our %ATTRIBUTES = (
-                        load			=> 'load',
-                        load_avg		=> 'loadAvg',
-                        load_min		=> 'loadMin',
-                        load_max		=> 'loadMax',
-                        mem_available		=> 'memAvailable',
-                        mem_available_avg	=> 'memAvailableAvg',
-                        mem_available_min	=> 'memAvailableMin',
-                        mem_available_max	=> 'memAvailableMax',
-                        mem_cached		=> 'memCached',
-                        mem_cached_avg		=> 'memCachedAvg',
-                        mem_cached_min		=> 'memCachedMin',
-                        mem_cached_max		=> 'memCachedMax',
-                        suspect			=> 'oobIfIp',
-                );
+	load			=> 'load',
+	load_avg		=> 'loadAvg',
+	load_min		=> 'loadMin',
+	load_max		=> 'loadMax',
+	mem_available		=> 'memAvailable',
+	mem_available_avg	=> 'memAvailableAvg',
+	mem_available_min	=> 'memAvailableMin',
+	mem_available_max	=> 'memAvailableMax',
+	mem_cached		=> 'memCached',
+	mem_cached_avg		=> 'memCachedAvg',
+	mem_cached_min		=> 'memCachedMin',
+	mem_cached_max		=> 'memCachedMax',
+	suspect			=> 'oobIfIp',
+);
 
 { no strict 'refs';
 
@@ -54,7 +56,7 @@ __END__
 
 =head1 NAME
 
-Cisco::UCS::Interconnect::Stats - utility class for representing Cisco UCS 
+Cisco::UCS::Interconnect::Stats - Utility class for representing Cisco UCS 
 Interconnect system statistics.
 
 =head1 SYNOPSIS

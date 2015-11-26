@@ -10,36 +10,38 @@ use Cisco::UCS::Blade::CPU;
 use Cisco::UCS::Blade::PowerBudget;
 use Cisco::UCS::Common::PowerStats;
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES	= qw(association availability discovery dn model name 
 operability presence revision serial uuid vendor);
 
 our %ATTRIBUTES = (
-		admin_state		=> 'adminState',
-		assignment		=> 'assignedToDn',
-		conn_path		=> 'connPath',
-		conn_status		=> 'connStatus',
-		cores_enabled		=> 'numOfCoresEnabled',
-		chassis			=> 'chassisId',
-		checkpoint		=> 'checkPoint',
-		description		=> 'descr',
-		id			=> 'slotId',
-		managing_instance	=> 'managingInst',
-		memory_speed		=> 'memorySpeed',
-		memory_available	=> 'availableMemory',
-		memory_total		=> 'totalMemory',
-		num_adaptors		=> 'numOfAdaptors',
-		num_cores		=> 'numOfCores',
-		num_cpus		=> 'numOfCpus',
-		num_eth_ifs		=> 'numOfEthHostIfs',
-		num_fc_ifs		=> 'numOfFcHostIfs',
-		num_threads		=> 'numOfThreads',
-		oper_power		=> 'operPower',
-		oper_state		=> 'operState',
-		server_id		=> 'serverId',
-		slot_id			=> 'slotId',
-		user_label		=> 'usrLbl',
-		uuid_original		=> 'originalUuid'
-		);
+	admin_state		=> 'adminState',
+	assignment		=> 'assignedToDn',
+	conn_path		=> 'connPath',
+	conn_status		=> 'connStatus',
+	cores_enabled		=> 'numOfCoresEnabled',
+	chassis			=> 'chassisId',
+	checkpoint		=> 'checkPoint',
+	description		=> 'descr',
+	id			=> 'slotId',
+	managing_instance	=> 'managingInst',
+	memory_speed		=> 'memorySpeed',
+	memory_available	=> 'availableMemory',
+	memory_total		=> 'totalMemory',
+	num_adaptors		=> 'numOfAdaptors',
+	num_cores		=> 'numOfCores',
+	num_cpus		=> 'numOfCpus',
+	num_eth_ifs		=> 'numOfEthHostIfs',
+	num_fc_ifs		=> 'numOfFcHostIfs',
+	num_threads		=> 'numOfThreads',
+	oper_power		=> 'operPower',
+	oper_state		=> 'operState',
+	server_id		=> 'serverId',
+	slot_id			=> 'slotId',
+	user_label		=> 'usrLbl',
+	uuid_original		=> 'originalUuid'
+);
 
 sub new {
 	my ($class, %args) = @_;

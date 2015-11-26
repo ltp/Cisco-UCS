@@ -6,19 +6,21 @@ use warnings;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES	= qw(chassis1 chassis2 chassis3 dn id leadership state);
 
 our %ATTRIBUTES = (
-		chassis1_device_io_state	=> 'chassisDeviceIoState1',
-		chassis2_device_io_state	=> 'chassisDeviceIoState2',
-		chassis3_device_io_state	=> 'chassisDeviceIoState3',
-		ha_failure_reason		=> 'haFailureReason',
-		ha_readiness			=> 'haReadiness',
-		ha_ready			=> 'haReady',
-		mgmt_services_state		=> 'mgmtServicesState',
-		umbilical_state			=> 'umbilicalState',
-		version_mismatch		=> 'versionMismatch'
-		);
+	chassis1_device_io_state	=> 'chassisDeviceIoState1',
+	chassis2_device_io_state	=> 'chassisDeviceIoState2',
+	chassis3_device_io_state	=> 'chassisDeviceIoState3',
+	ha_failure_reason		=> 'haFailureReason',
+	ha_readiness			=> 'haReadiness',
+	ha_ready			=> 'haReady',
+	mgmt_services_state		=> 'mgmtServicesState',
+	umbilical_state			=> 'umbilicalState',
+	version_mismatch		=> 'versionMismatch'
+);
 
 sub new {
 	my ( $class, %args ) = @_; 

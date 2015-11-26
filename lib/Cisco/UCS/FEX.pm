@@ -6,16 +6,18 @@ use strict;
 use Carp qw(croak);
 use Scalar::Util qw(weaken);
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES	= qw(discovery dn id model operability perf power presence 
 revision serial side thermal vendor voltage);
 
 our %ATTRIBUTES = (
-		chassis_id	=> 'chassisId',
-		config_state	=> 'configState',
-		oper_state	=> 'operState',
-		peer_status	=> 'peerCommStatus',
-		switch_id	=> 'switchId',
-		);
+	chassis_id	=> 'chassisId',
+	config_state	=> 'configState',
+	oper_state	=> 'operState',
+	peer_status	=> 'peerCommStatus',
+	switch_id	=> 'switchId',
+);
 
 {
         no strict 'refs';

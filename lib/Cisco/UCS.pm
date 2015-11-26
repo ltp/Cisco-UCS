@@ -16,23 +16,38 @@ use Carp qw(croak carp cluck);
 
 use vars qw($VERSION);
 
-our $VERSION		= '0.35';
+our $VERSION		= '0.4';
 
 our @ATTRIBUTES		= qw(dn cluster cookie);
 
 our %ATTRIBUTES		= ();
 
 sub new {
-        my ($class, %args) = @_;
+        my ( $class, %args ) = @_;
+
 	my $self = {};
         bless $self, $class;
-        defined $args{cluster}  ? $self->{cluster}  = $args{cluster}	: croak 'cluster not defined';
-        defined $args{username} ? $self->{username} = $args{username}	: croak 'username not defined';
-        defined $args{passwd}	? $self->{passwd}   = $args{passwd}	: croak 'passwd not defined';
-        defined $args{verify_hostname} ? $self->{verify_hostname} = $args{verify_hostname} : 0;
-	$self->{port}		= ($args{port}	or 443);
-	$self->{proto}		= ($args{proto} or 'https');
-	$self->{dn}		= ($args{dn} or 'sys');
+
+        defined $args{cluster}
+		? $self->{cluster} = $args{cluster}
+		: croak 'cluster not defined';
+
+        defined $args{username}
+		? $self->{username} = $args{username}
+		: croak 'username not defined';
+
+        defined $args{passwd}
+		? $self->{passwd} = $args{passwd}
+		: croak 'passwd not defined';
+
+        defined $args{verify_hostname}
+		? $self->{verify_hostname} = $args{verify_hostname}
+		: 0;
+
+	$self->{port}	= ( $args{port}	or 443      );
+	$self->{proto}	= ( $args{proto} or 'https' );
+	$self->{dn}	= ( $args{dn} or 'sys'      );
+
         return $self;
 }
 
@@ -58,27 +73,46 @@ sub login {
 	my $self = shift;
 
 	undef $self->{error};
-	$self->{ua}	= LWP::UserAgent->new( ssl_opts => { verify_hostname => $self->{verify_hostname} } );
-	$self->{uri}	= $self->{proto}. '://' .$self->{cluster}. ':' .$self->{port}. '/nuova';
-	$self->{req}	= HTTP::Request->new(POST => $self->{uri});
-	$self->{req}->content_type('application/x-www-form-urlencoded');
-	$self->{req}->content('<aaaLogin inName="'. $self->{username} .'" inPassword="'. $self->{passwd} .'"/>');
-	my $res		= $self->{ua}->request($self->{req});
 
-	unless ($res->is_success) {
-		$self->{error}	= 'Login failure: '.$res->status_line;
+	$self->{ua} = LWP::UserAgent->new( 
+				ssl_opts => { 
+					verify_hostname => $self->{verify_hostname}
+				} 
+			);
+
+	$self->{uri} = $self->{proto}. '://' .$self->{cluster}
+				. ':' .$self->{port}. '/nuova';
+
+	$self->{req} = HTTP::Request->new(
+					POST => $self->{uri}
+			);
+
+	$self->{req}->content_type( 'application/x-www-form-urlencoded' );
+
+	$self->{req}->content( '<aaaLogin inName="'. $self->{username} 
+				.'" inPassword="'. $self->{passwd} .'"/>' );
+
+	my $res	= $self->{ua}->request( $self->{req} );
+
+	unless ( $res->is_success ) {
+		$self->{error} = 'Login failure: '.$res->status_line;
 		return 0
 	}
 
 	$self->{parser}	= XML::Simple->new;
-	my $xml         = $self->{parser}->XMLin($res->content);
+	my $xml         = $self->{parser}->XMLin( $res->content );
 
-	if(defined $xml->{'errorCode'}) {
-		$self->{error}	= 'Login failure: '. (defined $xml->{'errorDescr'} ? $xml->{'errorDescr'} : 'Unspecified error');
+	if ( defined $xml->{'errorCode'} ) {
+		$self->{error}	= 'Login failure: '
+				. ( defined $xml->{'errorDescr'} 
+					? $xml->{'errorDescr'}
+					: 'Unspecified error'
+				);
 		return 0
 	}
 
 	$self->{cookie}	= $xml->{'outCookie'};
+
 	return 1
 }
 
@@ -86,49 +120,72 @@ sub refresh {
 	my $self = shift;
 
 	undef $self->{error};
-	$self->{req}->content('<aaaRefresh inName="'. $self->{username} .'" inPassword="'. $self->{passwd} .'" inCookie="' . $self->{cookie} . '"/>');
-	my $res	= $self->{ua}->request($self->{req});
+	$self->{req}->content( '<aaaRefresh inName="'. $self->{username} 
+				.'" inPassword="'. $self->{passwd} 
+				.'" inCookie="' . $self->{cookie} . '"/>'
+	);
 
-	unless ($res->is_success) {
-		$self->{error}	= 'Refresh failed: ' . $res->status_line;
+	my $res	= $self->{ua}->request( $self->{req} );
+
+	unless ( $res->is_success ) {
+		$self->{error}	= 'Refresh failed: '. $res->status_line;
 		return 0
 	}
 
-	my $xml	= $self->{parser}->XMLin($res->content());
+	my $xml	= $self->{parser}->XMLin( $res->content() );
 
-	if (defined $xml->{'errorCode'}) {
-		$self->{error}	= 'Refresh failure: '. (defined $xml->{'errorDescr'} ? $xml->{'errorDescr'} : 'Unspecified error');
+	if ( defined $xml->{'errorCode'} ) {
+		$self->{error}	= 'Refresh failure: '
+				. ( defined $xml->{'errorDescr'} 
+					? $xml->{'errorDescr'} 
+					: 'Unspecified error'
+				);
 		return 0
 	}
 
         $self->{cookie}	= $xml->{'outCookie'};
+
 	return 1
 }
 
 sub logout {
 	my $self = shift;
+
 	return unless $self->{cookie};
+
 	undef $self->{error};
-	return ( $self->_ucsm_request('<aaaLogout inCookie="'. $self->{cookie} .'" />') ? 1 : 0 )
+
+	return ( $self->_ucsm_request( '<aaaLogout inCookie="'
+				. $self->{cookie} .'" />' ) ? 1 : 0 
+	)
 }
 
 sub _ucsm_request {
-	my ($self, $content, $class_id)	= @_;
+	my ( $self, $content, $class_id ) = @_;
 
 	undef $self->{error};
-	$self->{req}->content($content);
-	my $res	= $self->{ua}->request($self->{req});
+	$self->{req}->content( $content );
+	my $res	= $self->{ua}->request( $self->{req} );
 
-	$self->error($res->status_line) unless $res->is_success;
+	$self->error( $res->status_line ) unless $res->is_success;
 
 	my $xml = ( $class_id 
-			? $self->{parser}->XMLin($res->content, KeyAttr => $class_id) 
-			: $self->{parser}->XMLin($res->content, KeyAttr => [ 'name', 'key', 'id', 'intId' ] )
+			? $self->{parser}->XMLin( 
+						$res->content, 
+						KeyAttr => $class_id 
+						)
+			: $self->{parser}->XMLin( 
+						$res->content, 
+						KeyAttr => [ 'name', 'key', 'id', 'intId' ] 
+						)
 		);
 
 	return ( $xml->{errorCode}
 			? do {
-				$self->{error}	= ( $xml->{'errorDescr'} ? $xml->{'errorDescr'} : 'Unspecified error' );
+				$self->{error} = ( $xml->{'errorDescr'} 
+							? $xml->{'errorDescr'}
+							: 'Unspecified error' 
+						);
 				undef
 			  }
 			: $xml
@@ -193,300 +250,455 @@ sub _ucsm_request {
 #
 
 sub _get_child_objects {
-        my ($self,%args)= @_; 
-	my $ucs = ( defined $self->{ucs}	? $self->{ucs}	: $self );
-	my $ref = ( defined $args{self}		? $args{self}	: $self );
+        my ( $self,%args ) = @_; 
+
+	my $ucs = ( defined $self->{ucs}
+			? $self->{ucs}
+			: $self 
+		);
+
+	my $ref = ( defined $args{self}
+			? $args{self}
+			: $self 
+		);
+
         my $xml = ( defined $args{class_filter} 
-			? $ucs->resolve_class_filter( %{$args{class_filter}} ) 
-			: $ucs->resolve_children(dn => $ref->{dn})
+			? $ucs->resolve_class_filter( %{ $args{class_filter} } ) 
+			: $ucs->resolve_children( dn => $ref->{dn} )
 		  );
 
-	if (ref($xml->{outConfigs}->{$args{type}}) eq 'ARRAY') {
+	if ( ref( $xml->{outConfigs}->{ $args{type} } ) eq 'ARRAY' ) {
 		$args{uid} ||= 'id';
 		my $res;
 		
-		foreach my $obj (@{$xml->{outConfigs}->{$args{type}}}) {
-			$res->{$obj->{$args{uid}}} = $obj
+		foreach my $obj ( @{ $xml->{outConfigs}->{ $args{type} } } ) {
+			$res->{ $obj->{ $args{uid} } } = $obj
 		}
 
-		$xml->{outConfigs}->{$args{type}} = $res
+		$xml->{outConfigs}->{ $args{type} } = $res
 	} 
-	elsif ((ref($xml->{outConfigs}->{$args{type}}) eq 'HASH') and (exists $xml->{outConfigs}->{$args{type}}->{dn})) {
+	elsif ( ( ref( $xml->{outConfigs}->{ $args{type} } ) eq 'HASH' ) 
+			and ( exists $xml->{outConfigs}->{ $args{type} }->{dn} ) ) {
 		$args{uid} ||= 'id';
 		my $res;
-		$res->{$xml->{outConfigs}->{$args{type}}->{$args{uid}}} = $xml->{outConfigs}->{$args{type}};
-		$xml->{outConfigs}->{$args{type}} = $res
+		$res->{ $xml->{outConfigs}->{ $args{type} }->{ $args{uid} } } 
+			= $xml->{outConfigs}->{ $args{type} };
+
+		$xml->{outConfigs}->{ $args{type} } = $res
 	}
 
-        return ( defined $xml->{outConfigs}->{$args{type}}
-                ? do {  my @res; 
-                        foreach my $res (keys %{$xml->{outConfigs}->{$args{type}}}) {
-                                my $obj = $args{class}->new( ucs => $ucs, dn => $xml->{outConfigs}->{$args{type}}->{$res}->{dn}, id => $res );
-                                $ref->{$args{attr}}->{$res} = $obj; #print "Setting $ref\->{$args{attr}}->{$res} to $obj\n";
+        return ( defined $xml->{outConfigs}->{ $args{type} }
+                ? do {  my @res;
+                        foreach my $res ( keys %{ $xml->{outConfigs}->{ $args{type} } } ) {
+                                my $obj = $args{class}->new( 
+							ucs => $ucs, 
+							dn  => $xml->{outConfigs}->{ $args{type} }->{$res}->{dn}, 
+							id  => $res 
+				);
+
+                                $ref->{ $args{attr} }->{$res} = $obj;
                                 push @res, $obj;
-                        }   
+                        }
+
                         return @res unless $args{id};
-                        return $ref->{$args{attr}}->{$args{id}} if $args{id} and $ref->{$args{attr}}->{$args{id}};
+
+                        return $ref->{ $args{attr} }->{ $args{id} } 
+				if $args{id} and $ref->{ $args{attr} }->{ $args{id} };
+
                         return
                      }    
                 : ()
-                );  
+                );
     
 }
 
 sub get_error_id {
 	warn "get_error_id has been deprecated in future releases";
-	return get_error(@_)
+	return get_error( @_ )
 }
 
 sub error {
-	my ($self, $id) = @_;
-	return ( defined $self->{fault}->{$id} ? $self->{fault}->{$id} : $self->get_error($id) )
+	my ( $self, $id ) = @_;
+
+	return ( 
+		defined $self->{fault}->{$id} 
+			? $self->{fault}->{$id} 
+			: $self->get_error($id) 
+	)
 }
 
 sub get_error {
-	my ($self, $id)=@_;
-	return $self->get_errors($id)
+	my ( $self, $id ) = @_;
+
+	return $self->get_errors( $id )
 }
 
 sub get_errors {
-	my ($self, $id)	=@_;
-	return $self->_get_child_objects(id => $id, type => 'faultInst', class => 'Cisco::UCS::Fault', 
-					uid => 'id', attr => 'fault', class_filter => { classId => 'faultInst' } );
+	my ( $self, $id ) = @_;
+
+	return $self->_get_child_objects(
+				id           => $id, 
+				type         => 'faultInst', 
+				class        => 'Cisco::UCS::Fault', 
+				uid          => 'id', 
+				attr         => 'fault', 
+				class_filter => { 
+						classId => 'faultInst'
+						}
+			);
 }
 
 sub _isInHierarchical {
-	my $inHierarchical	= lc shift;
+	my $inHierarchical = lc shift;
 
-	return 'false' unless ($inHierarchical =~ /true|false|0|1/); 
+	return 'false' unless ( $inHierarchical =~ /true|false|0|1/ ); 
 
-	return $inHierarchical if ($inHierarchical =~ /^true|false$/);
+	return $inHierarchical if ( $inHierarchical =~ /^true|false$/ );
 
-	return ($inHierarchical == 0 ? 'false' : 'true');
+	return ( $inHierarchical == 0 ? 'false' : 'true' );
 }
 
 sub _createFilter {
-	my ($self, %args)	= @_;
+	my ( $self, %args ) = @_;
 
-	unless (defined $args{classId}) {
-		$self->{error}	= 'No classId specified';
+	unless ( defined $args{classId} ) {
+		$self->{error} = 'No classId specified';
 		return
 	}
 
-	my $filter	= '<inFilter><and>';
+	my $filter = '<inFilter><and>';
 
-	while (my($property,$value) = each %args) {
-		next if ($property eq 'inHierarchical' or $property eq 'classId');
-		$filter	.= '<eq class="' . $args{classId} . '" property="' . $property . '" value="' . $value . '" />';
+	while ( my( $property,$value ) = each %args ) {
+		next if ( $property eq 'inHierarchical' or $property eq 'classId' );
+		$filter	.= '<eq class="' . $args{classId} . '" property="' 
+			. $property . '" value="' . $value . '" />';
 	}
 
-	$filter		.= '</and></inFilter>';
+	$filter	.= '</and></inFilter>';
 
 	return $filter;
 }
 
 sub resolve_class {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
 	unless ( defined $args{classId} ) {
-		$self->{error}	= 'No classId specified';
+		$self->{error} = 'No classId specified';
 		return
 	}
 
-	$args{inHierarchical} = (defined $args{inHierarchical} ? _isInHierarchical($args{inHierarchical}) : 'false');
+	$args{inHierarchical} = ( 
+		defined $args{inHierarchical} 
+			? _isInHierarchical( $args{inHierarchical} )
+			: 'false'
+	);
 
-	my $xml	= $self->_ucsm_request('<configResolveClass inHierarchical="' . $args{inHierarchical} . 
-					'" cookie="' . $self->{cookie} . '" classId="' . $args{classId} . '" />') or return;
+	my $xml	= $self->_ucsm_request( '<configResolveClass inHierarchical="' 
+					. $args{inHierarchical} .'" cookie="' 
+					. $self->{cookie} .'" classId="'
+					. $args{classId} .'" />' ) or return;
 
 	return $xml
 }	
 
 sub resolve_classes {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
-	unless (defined $args{classId}) {
-		$self->{error}	= 'No classID specified';
+	unless ( defined $args{classId} ) {
+		$self->{error} = 'No classID specified';
 		return
 	}
 
-	$args{inHierarchical}	= (defined $args{inHierarchical} ? _isInHierarchical($args{inHierarchical}) : 'false');
+	$args{inHierarchical} = ( 
+		defined $args{inHierarchical}
+			? _isInHierarchical( $args{inHierarchical} )
+			: 'false'
+	);
 
-	my $xml	= $self->_ucsm_request(	'<configResolveClasses inHierarchical="' . $args{inHierarchical} . 
-					'" cookie="' . $self->{cookie} . '">' .
-					'<inIds><Id value="' . $args{classId} . 
-					'" /></inIds></configResolveClasses>', 'classId'
-				) or return;
+	my $xml	= $self->_ucsm_request(	'<configResolveClasses inHierarchical="' 
+					. $args{inHierarchical}
+					. '" cookie="'. $self->{cookie} .'">' 
+					. '<inIds><Id value="'. $args{classId} 
+					. '" /></inIds></configResolveClasses>', 'classId'
+	) or return;
 
 	return $xml
 }	
 
 sub resolve_dn {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
-	unless (defined $args{dn}) {
-		$self->{error}	= 'No dn specified';
+	unless ( defined $args{dn} ) {
+		$self->{error} = 'No dn specified';
 		return
 	}
 
-	$args{inHierarchical}	= (defined $args{inHierarchical} ? _isInHierarchical($args{inHierarchical}) : 'false');
+	$args{inHierarchical} = ( 
+		defined $args{inHierarchical} 
+			? _isInHierarchical( $args{inHierarchical} )
+			: 'false'
+	);
 
-	my $xml	= $self->_ucsm_request(	'<configResolveDn dn="' . $args{dn} . 
-					'" inHierarchical="' . $args{inHierarchical} . 
-					'" cookie="' . $self->{cookie} . '" />' 
+	my $xml	= $self->_ucsm_request(	'<configResolveDn dn="'. $args{dn} 
+					. '" inHierarchical="'. $args{inHierarchical} 
+					. '" cookie="'. $self->{cookie} .'" />' 
 				) or return;
+
 	return $xml;
 }
 
 sub resolve_children {
-	my ($self,%args)= @_;
+	my ( $self, %args ) = @_;
 
-	unless (defined $args{dn}) {
-		$self->{error}	= 'No dn specified';
+	unless ( defined $args{dn} ) {
+		$self->{error} = 'No dn specified';
 		return
 	}
 
-	$args{inHierarchical}	= ( defined $args{inHierarchical} ? _isInHierarchical($args{inHierarchical}) : 'false' );
+	$args{inHierarchical} = ( 
+		defined $args{inHierarchical}
+			? _isInHierarchical( $args{inHierarchical} )
+			: 'false' 
+	);
 
-	my $xml	= $self->_ucsm_request(	'<configResolveChildren inHierarchical="' . $args{inHierarchical} . 
-					'" cookie="' . $self->{cookie} .
-					'" inDn="' . $args{dn} . 
-					'"></configResolveChildren>'
+	my $xml	= $self->_ucsm_request(	'<configResolveChildren inHierarchical="' 
+					. $args{inHierarchical} .'" cookie="' 
+					. $self->{cookie} .'" inDn="'
+					. $args{dn} .'"></configResolveChildren>'
 				) or return;
 
 	return $xml
 }	
 
 sub resolve_class_filter {
-	my($self,%args)	= @_;
+	my( $self, %args ) = @_;
 	
-	$args{inHierarchical}	= (defined $args{inHierarchical} ? _isInHierarchical($args{inHierarchical}) : 'false');
+	$args{inHierarchical} = ( 
+		defined $args{inHierarchical}
+			? _isInHierarchical( $args{inHierarchical} )
+			: 'false'
+	);
 
-	my $filter	= $self->_createFilter(%args) or return;
+	my $filter	= $self->_createFilter( %args ) or return;
 
-	my $xml		= $self->_ucsm_request('<configResolveClass classId="' . $args{classId} . '" inHierarchical="' . $args{inHierarchical} . '" cookie="' . $self->{cookie} . '">' .
-				$filter . '</configResolveClass>', $args{classId}) or return;
+	my $xml		= $self->_ucsm_request( '<configResolveClass classId="' 
+						. $args{classId} .'" inHierarchical="'
+						. $args{inHierarchical} .'" cookie="'
+						. $self->{cookie} .'">' . $filter 
+						. '</configResolveClass>', $args{classId} 
+					) or return;
 
 	return $xml
 }
 
 sub get_cluster_status {
-	my $self= shift;
+	my $self = shift;
 
-	my $xml	= $self->resolve_dn(dn => 'sys') or return;
+	my $xml	= $self->resolve_dn( dn => 'sys' ) or return;
 
-	return (defined $xml->{outConfig}->{topSystem} ? $xml->{outConfig}->{topSystem} : undef)
+	return ( 
+		defined $xml->{outConfig}->{topSystem}
+			? $xml->{outConfig}->{topSystem} 
+			: undef 
+	)
 }
 
 sub version {
-	my $self= shift;
-	my $xml	= $self->resolve_dn(dn => 'sys/mgmt/fw-system') or return;
-	return (defined $xml->{outConfig}->{firmwareRunning}->{version} ? $xml->{outConfig}->{firmwareRunning}->{version} : undef)
+	my $self = shift;
+
+	my $xml	= $self->resolve_dn( dn => 'sys/mgmt/fw-system' ) or return;
+
+	return ( 
+		defined $xml->{outConfig}->{firmwareRunning}->{version}
+			? $xml->{outConfig}->{firmwareRunning}->{version}
+			: undef
+	)
 }
 
 sub mgmt_entity {
-	my ($self, $id) = @_;
-	return ( defined $self->{mgmt_entity}->{$id} ? $self->{mgmt_entity}->{$id} : $self->mgmt_entity($id) )
+	my ( $self, $id ) = @_;
+
+	return ( 
+		defined $self->{mgmt_entity}->{$id}
+			? $self->{mgmt_entity}->{$id}
+			: $self->mgmt_entity($id)
+	)
 }
 
 sub get_mgmt_entity {
-	my ($self, $id)	= @_;
-	return $self->get_mgmt_entities($id)
+	my ( $self, $id ) = @_;
+
+	return $self->get_mgmt_entities( $id )
 }
 
 sub get_mgmt_entities {
-        my ($self, $id) = @_;
-	return $self->_get_child_objects(id => $id, type => 'mgmtEntity', class => 'Cisco::UCS::MgmtEntity', attr => 'mgmt_entity');
+        my ( $self, $id ) = @_;
+
+	return $self->_get_child_objects(
+				id    => $id, 
+				type  => 'mgmtEntity',
+				class => 'Cisco::UCS::MgmtEntity',
+				attr  => 'mgmt_entity'
+			);
 }
 
 sub get_primary_mgmt_entity {
-	my $self	= shift;
+	my $self = shift;
 
-	my $xml		= $self->resolve_class_filter(classId => 'mgmtEntity', leadership => 'primary') or return;
+	my $xml	= $self->resolve_class_filter(
+				classId    => 'mgmtEntity',
+				leadership => 'primary'
+			) or return;
 
-	return (defined $xml->{outConfigs}->{mgmtEntity} ? $xml->{outConfigs}->{mgmtEntity} : undef)
+	return ( 
+		defined $xml->{outConfigs}->{mgmtEntity}
+			? $xml->{outConfigs}->{mgmtEntity}
+			: undef
+	)
 }
 
 sub get_subordinate_mgmt_entity {
-	my $self= shift;
+	my $self = shift;
 
-	my $xml	= $self->resolve_class_filter(classId => 'mgmtEntity', leadership => 'subordinate') or return;
+	my $xml	= $self->resolve_class_filter(
+				classId    => 'mgmtEntity', 
+				leadership => 'subordinate'
+			) or return;
 
-	return (defined $xml->{outConfigs}->{mgmtEntity} ? $xml->{outConfigs}->{mgmtEntity} : undef);
+	return ( 
+		defined $xml->{outConfigs}->{mgmtEntity} 
+			? $xml->{outConfigs}->{mgmtEntity}
+			: undef
+	);
 }
 
 sub service_profile {
-	my ($self, $id)=@_;
-	return ( defined $self->{service_profile}->{$id} ? $self->{service_profile}->{$id} : $self->get_service_profile($id) )
+	my ( $self, $id ) = @_;
+
+	return ( 
+		defined $self->{service_profile}->{$id}
+			? $self->{service_profile}->{$id}
+			: $self->get_service_profile($id) 
+	)
 }
 
 sub get_service_profile {
-	my ($self, $id)	= @_;
-	return $self->get_service_profiles($id)
+	my ( $self, $id ) = @_;
+
+	return $self->get_service_profiles( $id )
 }
 
 sub get_service_profiles {
-	my ($self, $id)	=@_;
-	return $self->_get_child_objects(id => $id, type => 'lsServer', class => 'Cisco::UCS::ServiceProfile', 
-					uid => 'name', attr => 'service_profile', class_filter => { classId => 'lsServer' });
+	my ( $self, $id ) = @_;
+
+	return $self->_get_child_objects(
+				id           => $id, 
+				type         => 'lsServer', 
+				class        => 'Cisco::UCS::ServiceProfile', 
+				uid          => 'name', 
+				attr         => 'service_profile', 
+				class_filter => { 
+						classId => 'lsServer' 
+						}
+			);
 }
 
 sub interconnect {
-	my ($self, $id)	= @_;
-	return ( defined $self->{interconnect}->{$id} ? $self->{interconnect}->{$id} : $self->get_interconnect($id) )
+	my ( $self, $id ) = @_;
+
+	return ( 
+		defined $self->{interconnect}->{$id}
+			? $self->{interconnect}->{$id}
+			: $self->get_interconnect($id) 
+	)
 }
 
 sub get_interconnect {
-	my ($self, $id)=@_;
-	return $self->get_interconnects($id)
+	my ( $self, $id ) = @_;
+
+	return $self->get_interconnects( $id )
 }
 
 sub get_interconnects {
-	my ($self, $id)	=@_;
-	return $self->_get_child_objects(id => $id, type => 'networkElement', class => 'Cisco::UCS::Interconnect', attr => 'interconnect');
+	my ( $self, $id ) = @_;
+
+	return $self->_get_child_objects(
+				id    => $id, 
+				type  => 'networkElement', 
+				class => 'Cisco::UCS::Interconnect', 
+				attr  => 'interconnect'
+			);
 }
 
 sub blade {
-	my ($self, $id)	= @_;
-	return ( defined $self->{blade}->{$id} ? $self->{blade}->{$id} : $self->get_blade($id) )
+	my ( $self, $id ) = @_;
+
+	return ( 
+		defined $self->{blade}->{$id} 
+			? $self->{blade}->{$id}
+			: $self->get_blade($id) 
+	)
 }
 
 sub get_blade {
-	my ($self, $id)=@_;
-	return $self->get_blades($id)
+	my ( $self, $id ) = @_;
+
+	return $self->get_blades( $id )
 }
 
 sub get_blades {
-	my ($self, $id, %args)	=@_;
-	return $self->_get_child_objects(id => $id, type => 'computeBlade', class => 'Cisco::UCS::Blade', attr => 'blade',
-					uid => 'serverId', class_filter => { classId => 'computeBlade' });
+	my ( $self, $id, %args ) = @_;
+
+	return $self->_get_child_objects(
+				id           => $id, 
+				type         => 'computeBlade', 
+				class        => 'Cisco::UCS::Blade', 
+				attr         => 'blade',
+				uid          => 'serverId', 
+				class_filter => { 
+						classId => 'computeBlade' 
+						}
+			);
 }
 
 sub chassis {
-	my ($self, $id)	= @_;
-	return ( defined $self->{chassis}->{$id} ? $self->{chassis}->{$id} : $self->get_chassis($id) )
+	my ( $self, $id ) = @_;
+
+	return ( 
+		defined $self->{chassis}->{$id}
+			? $self->{chassis}->{$id}
+			: $self->get_chassis($id) 
+	)
 }
 
 sub get_chassis {
-	my ($self, $id)=@_;
-	return $self->get_chassiss($id)
+	my ( $self, $id ) = @_;
+
+	return $self->get_chassiss( $id )
 }
 
 sub get_chassiss {
-	my ($self, $id)	=@_;
-	return $self->_get_child_objects(id => $id, type => 'equipmentChassis', class => 'Cisco::UCS::Chassis', attr => 'chassis');
+	my ( $self, $id ) = @_;
+
+	return $self->_get_child_objects(
+				id    => $id, 
+				type  => 'equipmentChassis', 
+				class => 'Cisco::UCS::Chassis', 
+				attr  => 'chassis'
+			);
 }
 
 sub full_state_backup {
 	my ( $self, %args ) = @_;
 
-	$args{backup_type}= 'full-state';
+	$args{backup_type} = 'full-state';
 
 	return ( $self->_backup( %args ) );
 }
 sub all_config_backup {
 	my ( $self, %args ) = @_;
 
-	$args{backup_type}= 'config-all';
+	$args{backup_type} = 'config-all';
 
 	return ( $self->_backup( %args ) );
 }
@@ -494,7 +706,7 @@ sub all_config_backup {
 sub system_config_backup {
 	my ( $self, %args ) = @_;
 
-	$args{backup_type}= 'config-system';
+	$args{backup_type} = 'config-system';
 
 	return ( $self->_backup( %args ) );
 }
@@ -502,7 +714,7 @@ sub system_config_backup {
 sub logical_config_backup {
 	my ( $self, %args ) = @_;
 
-	$args{backup_type}= 'config-logical';
+	$args{backup_type} = 'config-logical';
 
 	return ( $self->_backup( %args ) );
 }
@@ -521,8 +733,17 @@ sub _backup {
 		return
 	}
 
-	$args{admin_state}		= ( defined $args{admin_state} ? $args{admin_state} : 'enabled' );
-	$args{preserve_pooled_values}	= ( defined $args{preserve_pooled_values} ? $args{preserve_pooled_values} : 'yes' );
+	$args{admin_state} = ( 
+		defined $args{admin_state} 
+			? $args{admin_state} 
+			: 'enabled' 
+	);
+
+	$args{preserve_pooled_values} = ( 
+		defined $args{preserve_pooled_values} 
+			? $args{preserve_pooled_values} 
+			: 'yes' 
+	);
 
 	unless ( $args{backup_type} =~ /(config-all|full-state|config-system|config-logical)/i ) {
 		$self->{error} = "Bad backup type ($args{backup_type})";
@@ -552,7 +773,7 @@ sub _backup {
 </configConfMos>
 XML
 
-	my $xml 	= $self->_ucsm_request( $data ) or return;
+	my $xml = $self->_ucsm_request( $data ) or return;
 
 	if ( defined $xml->{'errorCode'} ) {
 		my $self->{error} = ( defined $xml->{'errorDescr'} 

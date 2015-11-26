@@ -6,6 +6,8 @@ use warnings;
 use Cisco::UCS::Common::EnvironmentalStats;
 use Scalar::Util qw(weaken);
 
+our $VERSION = '0.4';
+
 our %V_MAP = (
 	arch			=> 'arch',
 	cores			=> 'cores',

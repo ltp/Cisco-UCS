@@ -7,20 +7,22 @@ use Carp qw(croak);
 use Scalar::Util qw(weaken);
 use Cisco::UCS::Chassis::PSU::Stats;
 
+our $VERSION = '0.4';
+
 our %ATTRIBUTES	= (
-		id 		=> 'id',
-		model 		=> 'model',
-		operability 	=> 'operability',
-		operational	=> 'operState',
-		performance	=> 'perf',
-		power 		=> 'power',
-		presence 	=> 'presence',
-		revision 	=> 'revision',
-		serial 		=> 'serial',
-		thermal 	=> 'thermal',
-		vendor 		=> 'vendor',
-		voltage		=> 'voltage',
-		);
+	id 		=> 'id',
+	model 		=> 'model',
+	operability 	=> 'operability',
+	operational	=> 'operState',
+	performance	=> 'perf',
+	power 		=> 'power',
+	presence 	=> 'presence',
+	revision 	=> 'revision',
+	serial 		=> 'serial',
+	thermal 	=> 'thermal',
+	vendor 		=> 'vendor',
+	voltage		=> 'voltage',
+);
 
 {
         no strict 'refs';

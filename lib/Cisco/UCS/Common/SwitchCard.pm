@@ -7,15 +7,17 @@ use Cisco::UCS::Common::EthernetPort;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES = qw(dn id model operability power presence revision serial 
 state thermal vendor voltage);
 
 our %ATTRIBUTES	= (
-			description	=> 'descr',
-			num_ports	=> 'numPorts',
-			performance	=> 'perf',
-			slot		=> 'id'
-		);
+	description	=> 'descr',
+	num_ports	=> 'numPorts',
+	performance	=> 'perf',
+	slot		=> 'id'
+);
 
 
 sub new {

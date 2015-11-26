@@ -5,6 +5,8 @@ use warnings;
 
 use Scalar::Util qw(weaken);
 
+our $VERSION = '0.4';
+
 our %V_MAP = (
 	inputCurrent	=> 'input_current',
 	inputCurrentAvg	=> 'input_current_avg',

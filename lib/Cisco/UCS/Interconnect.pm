@@ -10,29 +10,31 @@ use Cisco::UCS::Interconnect::Stats;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES	= qw(dn id model operability serial vendor);
 
 our %ATTRIBUTES = (
-			memory		=> 'totalMemory',
-			mgmt_ip		=> 'oobIfIp',
-			mgmt_gw		=> 'oobIfGw',
-			mgmt_net	=> 'oobIfMask',
-		);
+	memory		=> 'totalMemory',
+	mgmt_ip		=> 'oobIfIp',
+	mgmt_gw		=> 'oobIfGw',
+	mgmt_net	=> 'oobIfMask',
+);
 
-my %MMAP	= (	
-		card	=> {
-				type	=> 'equipmentSwitchCard',
-				class	=> 'Cisco::UCS::Common::SwitchCard', 
-			   },
-		fan	=> {
-				type	=> 'equipmentFan',
-				class	=> 'Cisco::UCS::Common::Fan'
-			   },
-			psu	=> {
-				type	=> 'equipmentPsu',
-				class	=> 'Cisco::UCS::Common::PSU'
-			   },
-		);
+my %MMAP = (	
+	card	=> {
+			type	=> 'equipmentSwitchCard',
+			class	=> 'Cisco::UCS::Common::SwitchCard', 
+		   },
+	fan	=> {
+			type	=> 'equipmentFan',
+			class	=> 'Cisco::UCS::Common::Fan'
+		   },
+		psu	=> {
+			type	=> 'equipmentPsu',
+			class	=> 'Cisco::UCS::Common::PSU'
+		   },
+);
 
 sub new {
 	my ( $class, %args ) = @_;

@@ -6,16 +6,18 @@ use warnings;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
+our $VERSION = '0.4';
+
 our @ATTRIBUTES	= qw(ack code cause created dn id occur rule severity tags 
 type);
 
 our %ATTRIBUTES	= (
-		last_transition		=> 'lastTransition',
-		highest_severity	=> 'highestSeverity',
-		original_severity	=> 'origSeverity',
-		previous_severity	=> 'prevSeverity',
-		desc			=> 'descr'
-		);
+	last_transition		=> 'lastTransition',
+	highest_severity	=> 'highestSeverity',
+	original_severity	=> 'origSeverity',
+	previous_severity	=> 'prevSeverity',
+	desc			=> 'descr'
+);
 
 sub new {
         my ( $class, %args ) = @_; 
