@@ -1,5 +1,10 @@
 Revision history for Cisco-UCS
 
+0.50	Mon 30 Nov 2015 <ltp@cpan.org>
+	- Use different versioning scheme because some package managers were found to
+	  misorder versions using a single decimal value.
+	- Changed Makefile.PL back to ExtUtils::MakMaker from inc::Module::Install.
+
 0.4	Thu 26 Nov 2015 <ltp@cpan.org>
 	- Release 0.04 - fixed VERSION in all modules.
 

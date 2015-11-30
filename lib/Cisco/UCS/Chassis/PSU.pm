@@ -7,7 +7,7 @@ use Carp qw(croak);
 use Scalar::Util qw(weaken);
 use Cisco::UCS::Chassis::PSU::Stats;
 
-our $VERSION = '0.4';
+our $VERSION = '0.50';
 
 our %ATTRIBUTES	= (
 	id 		=> 'id',

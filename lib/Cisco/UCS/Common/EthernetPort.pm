@@ -6,7 +6,7 @@ use strict;
 use Carp qw(croak);
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.4';
+our $VERSION = '0.50';
 
 our @ATTRIBUTES = qw( dn epDn mac mode type);
 

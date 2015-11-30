@@ -6,7 +6,7 @@ use warnings;
 use Carp		qw(croak);
 use Scalar::Util	qw(weaken);
 
-our $VERSION = '0.4';
+our $VERSION = '0.50';
 
 our @ATTRIBUTES	= qw(chassis1 chassis2 chassis3 dn id leadership state);
 
