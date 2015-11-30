@@ -1,21 +1,22 @@
 use strict;
 use warnings;
+use ExtUtils::MakeMaker;
 
-use English;
-use inc::Module::Install;
-
-name         q{Cisco-UCS};
-abstract     q{A Perl interface to the Cisco UCS XML API};
-author       q{Luke Poskitt <ltp@cpan.org>};
-license      q{perl};
-all_from     q{lib/Cisco/UCS.pm};
-version_from q{lib/Cisco/UCS.pm};
-
-test_requires q{Test::More};
-
-requires q{LWP};
-requires q{XML::Simple};
-
-tests_recursive;
-
-WriteAll;
+WriteMakefile(
+    NAME                => 'Cisco::UCS',
+    AUTHOR              => q{Luke Poskitt <ltp@cpan.org>},
+    VERSION_FROM        => 'lib/Cisco/UCS.pm',
+    ABSTRACT_FROM       => 'lib/Cisco/UCS.pm',
+    ($ExtUtils::MakeMaker::VERSION >= 6.3002
+      ? ('LICENSE'=> 'perl')
+      : ()),
+    PL_FILES            => {},
+    PREREQ_PM => {
+        'LWP'				=> 0,
+        'Test::More'			=> 0,
+        'XML::Simple'			=> 0,
+    },
+	
+    dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean => { FILES => 'Cisco-UCS-*' },
+);
