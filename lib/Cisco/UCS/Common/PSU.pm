@@ -6,7 +6,7 @@ use strict;
 use Carp qw(croak);
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our @ATTRIBUTES	= qw(dn id model operability power presence revision serial 
 thermal vendor voltage);

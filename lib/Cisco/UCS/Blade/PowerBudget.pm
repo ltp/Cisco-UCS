@@ -6,7 +6,7 @@ use warnings;
 use Cisco::UCS::Blade::PowerBudget;
 use Scalar::Util qw(weaken);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our %V_MAP = (
 	adminCommitted	=> 'admin_commited',

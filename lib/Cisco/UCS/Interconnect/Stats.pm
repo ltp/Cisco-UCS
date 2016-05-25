@@ -6,7 +6,7 @@ use warnings;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our %ATTRIBUTES = (
 	load			=> 'load',

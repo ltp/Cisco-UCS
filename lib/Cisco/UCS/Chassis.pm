@@ -14,7 +14,7 @@ use vars qw(@ISA);
 
 @ISA = qw(Cisco::UCS);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our %ATTRIBUTES = (
 	adminState	=> 'admin_state',

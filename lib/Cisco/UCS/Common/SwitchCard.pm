@@ -7,7 +7,7 @@ use Cisco::UCS::Common::EthernetPort;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our @ATTRIBUTES = qw(dn id model operability power presence revision serial 
 state thermal vendor voltage);
@@ -74,7 +74,6 @@ sub get_eth_ports {
 			class_filter => { 
 				classId		=> 'etherPIo',
 				slotId		=> $self->{id},
-				#switchId	=> $self->{id} 
 				switchId	=> $self->{interconnect_id} 
 			}
 	)

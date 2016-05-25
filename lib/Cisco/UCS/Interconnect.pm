@@ -10,7 +10,7 @@ use Cisco::UCS::Interconnect::Stats;
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our @ATTRIBUTES	= qw(dn id model operability serial vendor);
 
