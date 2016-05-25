@@ -74,7 +74,8 @@ sub get_eth_ports {
 			class_filter => { 
 				classId		=> 'etherPIo',
 				slotId		=> $self->{id},
-				switchId	=> $self->{id} 
+				#switchId	=> $self->{id} 
+				switchId	=> $self->{interconnect_id} 
 			}
 	)
 }

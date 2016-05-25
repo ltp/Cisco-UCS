@@ -30,7 +30,7 @@ my %MMAP = (
 			type	=> 'equipmentFan',
 			class	=> 'Cisco::UCS::Common::Fan'
 		   },
-		psu	=> {
+	psu	=> {
 			type	=> 'equipmentPsu',
 			class	=> 'Cisco::UCS::Common::PSU'
 		   },
@@ -102,7 +102,8 @@ sub new {
 					type	=> $MMAP{$m}{type},
 					class	=> $MMAP{$m}{class},
 					attr	=> $m,
-					self	=> $self
+					self	=> $self,
+					eattrs  => { interconnect_id => $self->{ id } }
 			) 
 		};
 	}

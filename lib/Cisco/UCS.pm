@@ -248,6 +248,11 @@ sub _ucsm_request {
 #
 #	filter	Where filter is composed of any number of valid attribute/value pairs.  For example: slotId => 1, switchId => $self->{id}.
 #
+#	eattrs	A hash containing key/value pairs that should be added to the retrieved child objects as additional
+#		attributes.  This can be useful where child objects need to "know" some infomration about their
+#		parent object.  e.g. an interconnect switchcard needs to know which interconnect it is located in (A or B)
+#		as this information is not exposed as an attribute of the switchcard.  
+#
 
 sub _get_child_objects {
         my ( $self,%args ) = @_; 
@@ -295,6 +300,8 @@ sub _get_child_objects {
 							dn  => $xml->{outConfigs}->{ $args{type} }->{$res}->{dn}, 
 							id  => $res 
 				);
+
+				map { $obj->{ $_ } = $args{ eattrs }{ $_ } } keys %{ $args{ eattrs } };
 
                                 $ref->{ $args{attr} }->{$res} = $obj;
                                 push @res, $obj;
